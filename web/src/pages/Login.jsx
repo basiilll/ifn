@@ -97,7 +97,7 @@ export default function Login() {
         <div className="mb-3.5 flex flex-col gap-1.5">
           <label htmlFor="email" className="text-xs font-medium text-muted">Email</label>
           <input
-            id="email" type="email" className="input" value={email}
+            id="email" type="email" maxLength={254} className="input" value={email}
             autoComplete="email"
             aria-invalid={invalidField === 'email' || undefined}
             aria-describedby={error ? 'login-error' : undefined}

@@ -91,7 +91,7 @@ export default function ForgotPassword() {
         <div className="mb-4 flex flex-col gap-1.5">
           <label htmlFor="email" className="text-xs font-medium text-muted">Email</label>
           <input
-            id="email" type="email" required className="input" value={email}
+            id="email" type="email" required maxLength={254} className="input" value={email}
             placeholder="you@example.com" autoComplete="email"
             aria-invalid={!!error}
             aria-describedby={error ? 'forgot-error' : undefined}

@@ -72,7 +72,7 @@ export default function Directory() {
 
       <div className="relative mt-4">
         <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
-        <input className="input pl-9 placeholder:text-muted" aria-label="Search members" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or startup..." />
+        <input className="input pl-9 placeholder:text-muted" aria-label="Search members" maxLength={200} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or startup..." />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

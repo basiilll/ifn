@@ -101,7 +101,7 @@ export default function ResetPassword() {
           <label htmlFor="password" className="text-xs font-medium text-muted">New password</label>
           <div className="relative">
             <input
-              id="password" type={showPassword ? 'text' : 'password'} className="input pr-14" value={password}
+              id="password" type={showPassword ? 'text' : 'password'} maxLength={128} className="input pr-14" value={password}
               placeholder="At least 8 characters" autoComplete="new-password"
               aria-invalid={!!error} aria-describedby={error ? 'reset-error' : undefined}
               onChange={(e) => setPassword(e.target.value)}
@@ -122,7 +122,7 @@ export default function ResetPassword() {
           <label htmlFor="confirm" className="text-xs font-medium text-muted">Confirm password</label>
           <div className="relative">
             <input
-              id="confirm" type={showConfirm ? 'text' : 'password'} className="input pr-14" value={confirm}
+              id="confirm" type={showConfirm ? 'text' : 'password'} maxLength={128} className="input pr-14" value={confirm}
               placeholder="Re-enter password" autoComplete="new-password"
               aria-invalid={!!error} aria-describedby={error ? 'reset-error' : undefined}
               onChange={(e) => setConfirm(e.target.value)}

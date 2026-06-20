@@ -257,7 +257,7 @@ export default function AdminPanel() {
         <h2 className="sr-only">Members</h2>
         <div className="relative mt-4">
           <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
-          <input className="input pl-9" value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)} aria-label="Search members" placeholder="Search members by name, email or startup..." />
+          <input className="input pl-9" maxLength={200} value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)} aria-label="Search members" placeholder="Search members by name, email or startup..." />
         </div>
         <div className="card mt-3 divide-y divide-line">
           {shownMembers.length === 0 && <div className="p-6 text-center text-sm text-muted">No members match.</div>}
@@ -509,7 +509,7 @@ export default function AdminPanel() {
             <option value="">All sectors</option>
             {SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="input w-44 min-h-9 py-1.5 text-xs" aria-label="Search ideas" placeholder="Search title / author / IFN" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input className="input w-44 min-h-9 py-1.5 text-xs" aria-label="Search ideas" maxLength={200} placeholder="Search title / author / IFN" value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
       )}
 
@@ -678,11 +678,11 @@ function SingleAdd() {
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <div className="min-w-[150px]">
             <label className="mb-1 block text-xs font-medium text-muted">Name (optional)</label>
-            <input className="input" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)} />
+            <input className="input" autoComplete="off" maxLength={120} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="min-w-[200px] flex-1">
             <label className="mb-1 block text-xs font-medium text-muted">Email</label>
-            <input className="input" type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !busy && email.trim()) createMember() }} />
+            <input className="input" type="email" autoComplete="off" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !busy && email.trim()) createMember() }} />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-muted">Role</label>
@@ -748,7 +748,7 @@ function BulkAdd() {
       <div className="card p-4">
         <h2 className="text-sm font-bold">Bulk add</h2>
         <p className="mt-0.5 text-xs text-muted">One per line as <code className="rounded bg-black/5 px-1 font-mono">Name, email, Type</code>. Type is optional (maps to a role; blank = student). Each account gets its own temporary password.</p>
-        <textarea className="input mt-3 min-h-[120px] w-full font-mono text-sm" placeholder={'Jane Doe, jane@acme.com, Founder\nRavi Kumar, ravi@x.edu, Mentor'} value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea className="input mt-3 min-h-[120px] w-full font-mono text-sm" maxLength={20000} placeholder={'Jane Doe, jane@acme.com, Founder\nRavi Kumar, ravi@x.edu, Mentor'} value={text} onChange={(e) => setText(e.target.value)} />
         <button className="btn-primary mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-sm" onClick={run} disabled={busy || !text.trim()}><UserPlus size={15} /> {busy ? 'Creating...' : 'Create accounts'}</button>
       </div>
 
@@ -792,7 +792,7 @@ function DeclineComposer() {
       <div className="mt-3 flex flex-wrap items-end gap-2">
         <div className="min-w-[240px] flex-1">
           <label className="mb-1 block text-xs font-medium text-muted">Recipient email(s)</label>
-          <input className="input" autoComplete="off" placeholder="someone@example.com, other@example.com" value={to} onChange={(e) => setTo(e.target.value)} />
+          <input className="input" autoComplete="off" maxLength={1000} placeholder="someone@example.com, other@example.com" value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
         <a href={valid ? declineMailto(recipients) : undefined} aria-disabled={!valid} onClick={(e) => { if (!valid) e.preventDefault() }} className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold ${valid ? 'border-line text-ink hover:bg-black/5' : 'cursor-not-allowed border-line text-faint'}`}><Mail size={15} /> Compose decline</a>
       </div>

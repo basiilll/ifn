@@ -337,7 +337,7 @@ export default function AutopsyLibrary() {
                   <label htmlFor="autopsy-project" className="text-xs font-medium text-muted">Project name *</label>
                   <input
                     id="autopsy-project"
-                    type="text" required value={projectName} onChange={(e) => setProjectName(e.target.value)}
+                    type="text" required maxLength={200} value={projectName} onChange={(e) => setProjectName(e.target.value)}
                     placeholder="e.g. QuickDrop" className="input"
                   />
                 </div>
@@ -352,7 +352,7 @@ export default function AutopsyLibrary() {
                   <label htmlFor="autopsy-domain" className="text-xs font-medium text-muted">Domain *</label>
                   <input
                     id="autopsy-domain"
-                    type="text" required value={domain} onChange={(e) => setDomain(e.target.value)}
+                    type="text" required maxLength={100} value={domain} onChange={(e) => setDomain(e.target.value)}
                     placeholder="e.g. Marketplace" className="input"
                   />
                 </div>
@@ -360,7 +360,7 @@ export default function AutopsyLibrary() {
                   <label htmlFor="autopsy-duration" className="text-xs font-medium text-muted">Duration</label>
                   <input
                     id="autopsy-duration"
-                    type="text" value={duration} onChange={(e) => setDuration(e.target.value)}
+                    type="text" maxLength={100} value={duration} onChange={(e) => setDuration(e.target.value)}
                     placeholder="e.g. 18 months" className="input"
                   />
                 </div>
@@ -370,7 +370,7 @@ export default function AutopsyLibrary() {
                 <label htmlFor="autopsy-investment" className="text-xs font-medium text-muted">Total investment</label>
                 <input
                   id="autopsy-investment"
-                  type="text" value={investment} onChange={(e) => setInvestment(e.target.value)}
+                  type="text" maxLength={100} value={investment} onChange={(e) => setInvestment(e.target.value)}
                   placeholder="e.g. $500k or 500 hours" className="input"
                 />
               </div>
@@ -379,7 +379,7 @@ export default function AutopsyLibrary() {
                 <label htmlFor="autopsy-rootcause" className="text-xs font-medium text-muted">Root cause of failure *</label>
                 <input
                   id="autopsy-rootcause"
-                  type="text" required value={rootCause} onChange={(e) => setRootCause(e.target.value)}
+                  type="text" required maxLength={500} value={rootCause} onChange={(e) => setRootCause(e.target.value)}
                   placeholder="One sentence summary of why it failed" className="input"
                 />
               </div>
@@ -388,7 +388,7 @@ export default function AutopsyLibrary() {
                 <label htmlFor="autopsy-story" className="text-xs font-medium text-muted">The story</label>
                 <textarea
                   id="autopsy-story"
-                  rows="3" value={story} onChange={(e) => setStory(e.target.value)}
+                  rows="3" maxLength={5000} value={story} onChange={(e) => setStory(e.target.value)}
                   placeholder="What happened, in detail?" className="input"
                 />
               </div>
@@ -397,7 +397,7 @@ export default function AutopsyLibrary() {
                 <label htmlFor="autopsy-lessons" className="text-xs font-medium text-muted">Key lessons (one per line) *</label>
                 <textarea
                   id="autopsy-lessons"
-                  rows="3" required value={keyLessons} onChange={(e) => setKeyLessons(e.target.value)}
+                  rows="3" required maxLength={3000} value={keyLessons} onChange={(e) => setKeyLessons(e.target.value)}
                   placeholder={'Lesson 1\nLesson 2'} className="input"
                 />
               </div>

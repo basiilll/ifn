@@ -17,6 +17,7 @@ export default function PasswordInput({ id, value, onChange, placeholder, autoCo
         onChange={onChange}
         aria-invalid={ariaInvalid}
         aria-describedby={ariaDescribedby}
+        maxLength={128}
         {...rest}
       />
       <button
