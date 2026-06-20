@@ -1,0 +1,14 @@
+# Local overrides for the IFN self-host stack (auto-merged by docker compose).
+# Adds Mailpit as the local mail catcher so GoTrue's confirm/recovery/invite mail is captured
+# locally instead of sent out. GoTrue points at mailpit:1025 (see SMTP_* in .env); the web UI is
+# on http://localhost:8025. Staging only — prod swaps GoTrue's SMTP for a real relay.
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      # Accept whatever GoTrue presents (no-auth or any creds) over plain SMTP on the compose net.
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "8035:8025"   # web UI; SMTP 1025 stays internal (reached as mailpit:1025)

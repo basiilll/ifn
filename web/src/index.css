@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  /* neutral tokens as RGB channels (consumed by tailwind as rgb(var() / alpha)).
+     Palette derives from the ICFAI logo: navy #2C2A82 letters, red #E31E24 bar,
+     paper #F7F5F2 plate. */
+  --c-page: 247 245 242;
+  --c-card: 255 255 255;
+  --c-line: 228 224 214;
+  --c-ink: 28 29 51;
+  --c-muted: 91 93 117;
+  --c-faint: 113 116 140; /* darkest "faint": placeholders/timestamps still pass 4.5:1 */
+  --c-accent: 44 42 130; /* #2C2A82 brand navy */
+  --c-accent-hover: 35 33 102;
+  --c-accent-soft: 234 234 247;
+  --c-on-accent: 255 255 255; /* text on accent-filled surfaces */
+  /* status colors as vars so both modes hit WCAG AA text contrast */
+  --c-down: 200 30 50;
+  --c-success: 14 122 82;
+  --c-warn: 232 167 20;
+  --c-warn-ink: 122 95 0; /* readable text on warn tints */
+}
+
+.dark {
+  color-scheme: dark;
+  /* near-black neutral surfaces (no purple tint); brand indigo brightened to a
+     true blue for the accent so the dark theme reads black + blue, not violet. */
+  --c-page: 12 12 13;        /* #0C0C0D near-black */
+  --c-card: 24 24 27;        /* #18181B lifted surface */
+  --c-line: 40 40 45;        /* #28282D neutral border */
+  --c-ink: 237 237 240;
+  --c-muted: 161 161 171;    /* AA on card and page */
+  --c-faint: 140 141 150;    /* placeholders/timestamps still pass 4.5:1 */
+  --c-accent: 110 139 255;   /* #6E8BFF cornflower blue */
+  --c-accent-hover: 140 165 255;
+  --c-accent-soft: 26 30 48; /* #1A1E30 deep blue chip/nav surface */
+  --c-on-accent: 12 12 13;   /* near-black text on the bright-blue button */
+  --c-down: 242 106 126;
+  --c-success: 52 199 142;
+  --c-warn: 232 167 20;
+  --c-warn-ink: 240 200 102;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+    /* faint paper grain on the page surface (cards sit on top, untextured) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.035'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* display face is reserved for page-level titles; UI labels and card
+     headings stay in the body family (product register: no display fonts in UI) */
+  h1 {
+    @apply font-display;
+    letter-spacing: -0.01em;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold
+           transition-colors disabled:cursor-not-allowed disabled:opacity-50 select-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
+           focus-visible:ring-offset-2 focus-visible:ring-offset-page;
+  }
+  /* primary: solid brand navy, flat; press = slight downward nudge */
+  .btn-primary {
+    @apply btn bg-accent px-4 py-2 text-sm;
+    color: rgb(var(--c-on-accent));
+    transition: background-color 0.15s ease, transform 0.1s ease;
+  }
+  .btn-primary:hover:not(:disabled) {
+    @apply bg-accent-hover;
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  /* disabled: a flat neutral chip, not faded navy (50% navy reads as a pale-purple
+     blob with low-contrast text). opacity:1 cancels the .btn opacity-50 default. */
+  .btn-primary:disabled {
+    @apply bg-line text-muted;
+    opacity: 1;
+  }
+  .btn-ghost {
+    @apply btn text-ink hover:bg-black/5 px-4 py-2 text-sm;
+  }
+  .btn-outline {
+    @apply btn border border-line text-ink hover:bg-black/5 px-4 py-2 text-sm;
+  }
+  .card {
+    @apply bg-card border border-line rounded-xl2 shadow-card;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-card px-3 py-2 text-sm
+           outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 placeholder:text-faint;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-md bg-accent-soft text-accent
+           px-2 py-0.5 text-xs font-semibold ring-1 ring-accent/15;
+  }
+}
+
+/* reduced motion: state changes become instant, nothing is gated on animation */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in,
+  .animate-fade-in,
+  .animate-pulse {
+    animation: none;
+  }
+  /* neutralize sliding/scaling transitions (e.g. toggle knobs) — settle instantly */
+  .transition-transform {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* Dark mode: flip black hover overlays to subtle white (else invisible on dark). */
+.dark .hover\:bg-black\/5:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* react-datepicker: match the app theme (popup defaults to light). */
+.react-datepicker {
+  font-family: inherit;
+  border-color: rgb(var(--c-line));
+  background-color: rgb(var(--c-card));
+  color: rgb(var(--c-ink));
+}
+.react-datepicker__header {
+  background-color: rgb(var(--c-page));
+  border-bottom-color: rgb(var(--c-line));
+}
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name,
+.react-datepicker__time-list-item {
+  color: rgb(var(--c-ink));
+}
+.react-datepicker__day:hover,
+.react-datepicker__time-list-item:hover {
+  background-color: rgb(var(--c-accent-soft)) !important;
+  color: rgb(var(--c-accent)) !important;
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+  background-color: rgb(var(--c-accent)) !important;
+  color: rgb(var(--c-on-accent)) !important;
+}
+.react-datepicker__day--outside-month { color: rgb(var(--c-faint)); }
+.react-datepicker__time-container,
+.react-datepicker__time,
+.react-datepicker__time-box,
+.react-datepicker__time-list {
+  background-color: rgb(var(--c-card));
+}
+.react-datepicker__triangle::before,
+.react-datepicker__triangle::after {
+  border-bottom-color: rgb(var(--c-page)) !important;
+}
+.react-datepicker__close-icon::after {
+  background-color: rgb(var(--c-muted));
+}

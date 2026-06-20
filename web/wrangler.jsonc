@@ -1,0 +1,12 @@
+{
+  // Static-asset Worker for the IFN Vite SPA.
+  // `npm run build` produces ./dist, then `npx wrangler deploy` uploads it.
+  "name": "ifn",
+  "compatibility_date": "2026-06-18",
+  "assets": {
+    "directory": "./dist",
+    // Serve index.html (HTTP 200) for any unmatched path so client-side
+    // React Router handles deep links like /login, /directory.
+    "not_found_handling": "single-page-application"
+  }
+}

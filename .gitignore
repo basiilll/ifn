@@ -1,0 +1,10 @@
+.obsidian/
+.DS_Store
+.claude/
+
+# impeccable local tooling state (critique snapshots, config)
+.impeccable/
+
+# supabase CLI local link/state
+supabase/.temp/
+.gstack/

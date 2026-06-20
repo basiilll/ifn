@@ -1,0 +1,1 @@
+update public.profiles set role='admin', onboarded=true, must_change_password=false where id='424408f1-a59b-4a3e-9b62-b8f6f338eda4';
