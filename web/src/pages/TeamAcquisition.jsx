@@ -367,8 +367,14 @@ function PostNeedModal({ edit, onClose, onSaved }) {
   const [error, setError] = useState('')
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const initialRef = useRef(JSON.stringify({ ...f, skills: edit?.skills || [] }))
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const valid = f.title.trim() && f.looking_for.trim() && f.description.trim()
+  const [fieldErr, setFieldErr] = useState({})
+  const titleRef = useRef(null)
+  const descRef = useRef(null)
+  const lookingRef = useRef(null)
+  const set = (k) => (e) => {
+    setF((p) => ({ ...p, [k]: e.target.value }))
+    setFieldErr((p) => (p[k] ? { ...p, [k]: '' } : p)) // clear a field's error as they fix it
+  }
 
   function requestClose() {
     if (busy) return
@@ -387,7 +393,16 @@ function PostNeedModal({ edit, onClose, onSaved }) {
   }
 
   async function submit() {
-    if (!valid) return setError('Title, description and "looking for" are required.')
+    const errs = {}
+    if (!f.title.trim()) errs.title = 'Add a role title.'
+    if (!f.description.trim()) errs.description = 'Add a description.'
+    if (!f.looking_for.trim()) errs.looking_for = 'Say who you are looking for.'
+    if (errs.title || errs.description || errs.looking_for) {
+      setFieldErr(errs)
+      ;(errs.title ? titleRef : errs.description ? descRef : lookingRef).current?.focus()
+      return
+    }
+    setFieldErr({})
     setBusy(true)
     const payload = {
       title: f.title.trim(),
@@ -412,12 +427,12 @@ function PostNeedModal({ edit, onClose, onSaved }) {
       {error && <div role="alert" className="mt-4 rounded-lg border border-down/30 bg-down/10 px-3 py-2 text-sm text-down">{error}</div>}
       <div className="mt-4 space-y-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <L label="Role title *"><input className="input" maxLength={200} value={f.title} onChange={set('title')} placeholder="Full-Stack Developer" /></L>
+          <L label="Role title *" error={fieldErr.title}><input ref={titleRef} className="input" aria-invalid={!!fieldErr.title || undefined} maxLength={200} value={f.title} onChange={set('title')} placeholder="Full-Stack Developer" /></L>
           <L label="Startup"><input className="input" maxLength={200} value={f.startup} onChange={set('startup')} placeholder="FarmSense" /></L>
         </div>
-        <L label="Description *"><textarea className="input min-h-[70px] resize-y" maxLength={1200} value={f.description} onChange={set('description')} placeholder="What you need and why" /></L>
+        <L label="Description *" error={fieldErr.description}><textarea ref={descRef} className="input min-h-[70px] resize-y" aria-invalid={!!fieldErr.description || undefined} maxLength={1200} value={f.description} onChange={set('description')} placeholder="What you need and why" /></L>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <L label="Looking for *"><input className="input" maxLength={200} value={f.looking_for} onChange={set('looking_for')} placeholder="Co-founder" /></L>
+          <L label="Looking for *" error={fieldErr.looking_for}><input ref={lookingRef} className="input" aria-invalid={!!fieldErr.looking_for || undefined} maxLength={200} value={f.looking_for} onChange={set('looking_for')} placeholder="Co-founder" /></L>
           <L label="Commitment"><input className="input" maxLength={120} value={f.commitment} onChange={set('commitment')} placeholder="Part-time" /></L>
           <L label="Stage">
             <select className="input" value={f.stage} onChange={set('stage')}>
@@ -444,7 +459,7 @@ function PostNeedModal({ edit, onClose, onSaved }) {
       </div>
       <div className="mt-5 flex justify-end gap-2">
         <button className="btn-ghost" onClick={onClose} disabled={busy}>Cancel</button>
-        <button className="btn-primary" disabled={busy || !valid} onClick={submit}>
+        <button className="btn-primary" disabled={busy} onClick={submit}>
           {busy ? 'Saving...' : edit ? 'Save changes' : 'Post'}
         </button>
       </div>
@@ -516,7 +531,7 @@ function ApplyModal({ post, onClose, onSent }) {
       </label>
       <div className="mt-4 flex justify-end gap-2">
         <button className="btn-ghost" onClick={onClose} disabled={busy}>Cancel</button>
-        <button className="btn-primary" onClick={send} disabled={busy || !msg.trim() || !contact.trim()}>
+        <button className="btn-primary" onClick={send} disabled={busy}>
           {busy ? 'Sending...' : 'Send application'}
         </button>
       </div>
@@ -586,11 +601,12 @@ function ApplicantsModal({ post, onClose }) {
   )
 }
 
-function L({ label, children }) {
+function L({ label, error, children }) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-muted">{label}</span>
       {children}
+      {error && <p className="mt-1 text-xs font-medium text-down">{error}</p>}
     </label>
   )
 }

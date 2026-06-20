@@ -24,8 +24,13 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
   }))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const valid = f.title.trim() && f.description.trim()
+  const [fieldErr, setFieldErr] = useState({})
+  const titleRef = useRef(null)
+  const descRef = useRef(null)
+  const set = (k) => (e) => {
+    setF((p) => ({ ...p, [k]: e.target.value }))
+    setFieldErr((p) => (p[k] ? { ...p, [k]: '' } : p)) // clear a field's error as they fix it
+  }
 
   function requestClose() {
     if (busy) return
@@ -46,7 +51,15 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
   }
 
   async function submit() {
-    if (!valid) return setError('Title and description are required.')
+    const errs = {}
+    if (!f.title.trim()) errs.title = 'Add a problem title.'
+    if (!f.description.trim()) errs.description = 'Add a description.'
+    if (errs.title || errs.description) {
+      setFieldErr(errs)
+      ;(errs.title ? titleRef : descRef).current?.focus() // jump to the first thing missing
+      return
+    }
+    setFieldErr({})
     setBusy(true)
     const payload = {
       title: f.title.trim(),
@@ -68,8 +81,8 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
         <p className="mt-2 text-sm text-muted">Describe a real problem you face. Members reply with solutions; mentors score them.</p>
         {error && <div role="alert" className="mt-3 rounded-lg border border-down/30 bg-down/10 px-3 py-2 text-sm text-down">{error}</div>}
         <div className="mt-4 space-y-3">
-          <L label="Problem title *"><input className="input" maxLength={200} value={f.title} onChange={set('title')} placeholder="Farmers cannot verify soil quality cheaply" /></L>
-          <L label="Description *"><textarea className="input min-h-[100px] resize-y" maxLength={3000} value={f.description} onChange={set('description')} placeholder="The context, who is affected, what a good solution looks like" /></L>
+          <L label="Problem title *" error={fieldErr.title}><input ref={titleRef} className="input" aria-invalid={!!fieldErr.title || undefined} maxLength={200} value={f.title} onChange={set('title')} placeholder="Farmers cannot verify soil quality cheaply" /></L>
+          <L label="Description *" error={fieldErr.description}><textarea ref={descRef} className="input min-h-[100px] resize-y" aria-invalid={!!fieldErr.description || undefined} maxLength={3000} value={f.description} onChange={set('description')} placeholder="The context, who is affected, what a good solution looks like" /></L>
           <L label="Needed by"><input className="input" type="date" value={f.deadline} onChange={set('deadline')} /></L>
           <L label={`Domain tags (${tags.length}/${MAX_TAGS})`}>
             {tags.length > 0 && (
@@ -90,7 +103,7 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
         </div>
       <div className="mt-5 flex justify-end gap-2">
         <button className="btn-ghost" onClick={requestClose} disabled={busy}>Cancel</button>
-        <button className="btn-primary" disabled={busy || !valid} onClick={submit}>
+        <button className="btn-primary" disabled={busy} onClick={submit}>
           {busy ? 'Saving...' : edit ? 'Save changes' : 'Post'}
         </button>
       </div>
@@ -98,11 +111,12 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
   )
 }
 
-function L({ label, children }) {
+function L({ label, error, children }) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-muted">{label}</span>
       {children}
+      {error && <p className="mt-1 text-xs font-medium text-down">{error}</p>}
     </label>
   )
 }
