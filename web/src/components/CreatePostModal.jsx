@@ -219,9 +219,10 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
         ) : (
           <>
             <div className="mt-4 space-y-3">
-              <input className="input" placeholder="Title" maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input className="input" aria-label="Post title" placeholder="Title" maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} />
               <textarea
                 className="input min-h-[120px] resize-y"
+                aria-label="Post body"
                 placeholder="Share an idea, a problem, a question, or a win"
                 maxLength={5000} value={body} onChange={(e) => setBody(e.target.value)}
               />
