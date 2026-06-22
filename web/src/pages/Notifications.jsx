@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Bell, Check, Trash2, ChevronDown, ExternalLink, CheckCircle2, Workflow, User, MessageSquare } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -10,6 +11,7 @@ import ConfirmModal from '../components/ConfirmModal'
 const GENERIC_ERR = 'Something went wrong. Please try again.'
 
 export default function Notifications() {
+  usePageTitle('Notifications')
   const { isAdmin } = useAuth()
   // members have one list; admins get tabs: needs action | all activity
   const [tab, setTab] = useState(isAdmin ? 'needs' : 'mine')

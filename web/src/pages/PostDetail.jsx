@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { ArrowLeft, ArrowBigUp, ArrowBigDown, MessageCircle, MoreHorizontal, Pin } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -63,6 +64,7 @@ export default function PostDetail() {
   const uid = session?.user?.id
 
   const [post, setPost] = useState(null)
+  usePageTitle(post?.title || 'Post')
   const [comments, setComments] = useState([])
   const [updates, setUpdates] = useState([])
   const [loading, setLoading] = useState(true)

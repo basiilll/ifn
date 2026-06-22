@@ -7,7 +7,9 @@ import PostCard from '../components/PostCard'
 import PostCardSkeleton from '../components/PostCardSkeleton'
 import CreatePostModal from '../components/CreatePostModal'
 import CreatePollModal from '../components/CreatePollModal'
+import FirstRunBanner from '../components/FirstRunBanner'
 import { useAuth } from '../lib/AuthProvider'
+import { usePageTitle } from '../lib/usePageTitle'
 
 const PAGE = 20
 const SORTS = [
@@ -48,6 +50,7 @@ function parseQuery(q) {
 }
 
 export default function Feed() {
+  usePageTitle('Feed')
   const { isAdmin, restricted } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [feedLocked, setFeedLocked] = useState(false)
@@ -233,6 +236,7 @@ export default function Feed() {
   return (
     <div>
       <h1 className="sr-only">Feed</h1>
+      <FirstRunBanner />
       {/* search + create */}
       <div className="mb-3 flex items-center gap-2">
         <div className="relative flex-1">

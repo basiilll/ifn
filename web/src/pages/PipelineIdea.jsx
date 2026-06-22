@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { ArrowLeft, Paperclip, Download, Send, CheckCircle2, Circle, CalendarClock, Pencil, Trash2, FileDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -21,6 +22,7 @@ export default function PipelineIdea() {
   const { isAdmin } = useAuth()
 
   const [d, setD] = useState(null)
+  usePageTitle(d?.idea?.title ? `${d.idea.title} — Pipeline` : 'Idea Pipeline')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editOpen, setEditOpen] = useState(false)

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Plus, Search, X, Trash2, ChevronRight, IndianRupee } from 'lucide-react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { supabase } from '../lib/supabase'
 import { linkedinUrl } from '../lib/linkedin'
 import ModalShell from '../components/ModalShell'
@@ -47,6 +48,7 @@ const KIND = {
 const meta = (kind) => KIND[kind] || KIND.request
 
 export default function Services() {
+  usePageTitle('Services')
   const { session, isAdmin } = useAuth()
   const uid = session?.user?.id
 

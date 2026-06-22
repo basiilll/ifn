@@ -86,8 +86,8 @@ export default function Topbar({ onMenu }) {
         </Link>
 
         <div className="ml-auto flex items-center gap-1">
-          {/* calendar */}
-          <Link to="/calendar" className="rounded-full p-2 text-muted hover:bg-black/5 hover:text-ink" aria-label="Calendar">
+          {/* calendar — hidden on mobile where it lives in the sidenav drawer */}
+          <Link to="/calendar" className="hidden lg:flex rounded-full p-2 text-muted hover:bg-black/5 hover:text-ink" aria-label="Calendar">
             <Calendar size={20} />
           </Link>
           <div className="relative" ref={bellRef}>
@@ -108,24 +108,30 @@ export default function Topbar({ onMenu }) {
 
                 {/* Tab bar: mentor+ only; members just see their own list */}
                 {isMentor && (
-                <div className="flex gap-1 p-2 border-b border-line bg-page/50">
-                  <button 
+                <div role="tablist" aria-label="Notification filter" className="flex gap-1 p-2 border-b border-line bg-page/50">
+                  <button
+                    role="tab"
+                    aria-selected={activeFilter === 'action'}
                     onClick={() => setActiveFilter('action')}
                     className={`flex-1 text-center py-1 text-xs font-semibold rounded-md transition-colors ${activeFilter === 'action' ? 'bg-accent-soft text-accent border border-accent/20' : 'text-muted hover:bg-black/5'}`}
                   >
                     Needs action
                   </button>
-                  <button 
+                  <button
+                    role="tab"
+                    aria-selected={activeFilter === 'all'}
                     onClick={() => setActiveFilter('all')}
                     className={`flex-1 text-center py-1 text-xs font-semibold rounded-md transition-colors ${activeFilter === 'all' ? 'bg-accent-soft text-accent border border-accent/20' : 'text-muted hover:bg-black/5'}`}
                   >
                     All activity
                   </button>
-                  <button 
+                  <button
+                    role="tab"
+                    aria-selected={activeFilter === 'mine'}
                     onClick={() => setActiveFilter('mine')}
                     className={`flex-1 text-center py-1 text-xs font-semibold rounded-md transition-colors ${activeFilter === 'mine' ? 'bg-accent-soft text-accent border border-accent/20' : 'text-muted hover:bg-black/5'}`}
                   >
-                    Mine
+                    My activity
                   </button>
                 </div>
                 )}

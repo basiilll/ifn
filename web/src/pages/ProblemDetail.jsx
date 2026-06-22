@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { ArrowLeft, ArrowBigUp, ArrowBigDown, CalendarClock, MessageCircle, MoreHorizontal } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -73,6 +74,7 @@ export default function ProblemDetail() {
   const uid = session?.user?.id
 
   const [problem, setProblem] = useState(null)
+  usePageTitle(problem?.title || 'Problem Hub')
   const [solutions, setSolutions] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)

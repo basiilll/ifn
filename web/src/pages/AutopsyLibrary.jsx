@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
+import { usePageTitle } from '../lib/usePageTitle';
 import { supabase } from '../lib/supabase';
 import { errMessage } from '../lib/errors';
 import { useAuth } from '../lib/AuthProvider';
@@ -9,6 +10,7 @@ import ModalShell from '../components/ModalShell';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function AutopsyLibrary() {
+  usePageTitle('Autopsy Library')
   const { session, isAdmin } = useAuth();
   const uid = session?.user?.id;
   const [autopsies, setAutopsies] = useState([]);

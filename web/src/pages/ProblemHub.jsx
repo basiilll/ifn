@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Plus, Search, CalendarClock, MessageCircle, ArrowBigUp, ArrowBigDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -10,6 +11,7 @@ import { timeAgo } from '../lib/format'
 const GENERIC_ERR = 'Something went wrong. Please try again.'
 
 export default function ProblemHub() {
+  usePageTitle('Problem Hub')
   const { session } = useAuth()
 
   const [problems, setProblems] = useState([])

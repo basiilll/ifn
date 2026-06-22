@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Check } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -14,6 +15,7 @@ const NOTIF_ROWS = [
 ]
 
 export default function Settings() {
+  usePageTitle('Settings')
   const { session } = useAuth()
   const email = session?.user?.email
   const userId = session?.user?.id

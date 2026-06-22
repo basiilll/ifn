@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Search, Pin } from 'lucide-react'
+import { usePageTitle } from '../lib/usePageTitle'
 import { supabase } from '../lib/supabase'
 import { linkedinUrl } from '../lib/linkedin'
 import { REGIONS, SECTORS, DOMAINS, MEMBER_TYPES } from '../lib/options'
@@ -28,6 +29,7 @@ function FilterDropdown({ label, value, options, onChange }) {
 }
 
 export default function Directory() {
+  usePageTitle('Directory')
   const { isAdmin, session } = useAuth()
   const uid = session?.user?.id
   const [q, setQ] = useState('')

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Users, SlidersHorizontal, Search, Workflow, UserPlus, Copy, Check, FolderHeart, Mail } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { errMessage } from '../lib/errors'
@@ -23,6 +24,7 @@ const GENERIC_ERR = 'Something went wrong. Please try again.'
 const TAB_KEYS = ['members', 'pipeline', 'add', 'settings', 'autopsies']
 
 export default function AdminPanel() {
+  usePageTitle('Admin Panel')
   const { session, profile, isAdmin } = useAuth()
   const uid = session?.user?.id
   const [searchParams] = useSearchParams()

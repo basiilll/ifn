@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { ChevronLeft, ChevronRight, Plus, CalendarPlus, Download, MapPin, Clock, Flag } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -18,6 +19,7 @@ const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1)
 const fmtTime = (d) => new Date(d).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 
 export default function Calendar() {
+  usePageTitle('Calendar')
   const { isAdmin } = useAuth()
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1) })
   const [events, setEvents] = useState([])

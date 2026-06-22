@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Workflow, Plus, Lock } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import ModalShell from '../components/ModalShell'
@@ -16,6 +17,7 @@ const GENERIC_ERR = 'Something went wrong. Please try again.'
 // Student home for the Idea Pipeline: my applications + their gates, and the entry point
 // (a standalone application form - independent from feed posts).
 export default function Pipeline() {
+  usePageTitle('Idea Pipeline')
   const navigate = useNavigate()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)

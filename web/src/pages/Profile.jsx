@@ -1,5 +1,6 @@
 import { cloneElement, useEffect, useId, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { usePageTitle } from '../lib/usePageTitle'
 import { useAuth } from '../lib/AuthProvider'
 import { REGIONS, SECTORS, DOMAINS } from '../lib/options'
 import { errMessage } from '../lib/errors'
@@ -9,6 +10,7 @@ import ProfileSkeleton from '../components/ProfileSkeleton'
 import Combobox from '../components/Combobox'
 
 export default function Profile() {
+  usePageTitle('Profile')
   const { session } = useAuth()
   const email = session?.user?.email
   const userId = session?.user?.id

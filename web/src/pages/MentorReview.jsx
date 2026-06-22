@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { Inbox, ClipboardCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
@@ -13,6 +14,7 @@ const GENERIC_ERR = 'Something went wrong. Please try again.'
 
 // Mentor home: the pull-queue (unassigned G1 ideas, self-pick) + my assigned ideas.
 export default function MentorReview() {
+  usePageTitle('Mentor Review')
   const navigate = useNavigate()
   const { profile, isMentor } = useAuth()
 
