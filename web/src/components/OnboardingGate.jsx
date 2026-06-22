@@ -6,9 +6,12 @@ import Spinner from './Spinner'
 // Wraps the app shell: a logged-in user who has not finished onboarding is sent to
 // /onboarding before they can use anything. Waits for the profile row to load first.
 export default function OnboardingGate({ children }) {
-  const { profile } = useAuth()
+  const { profile, profileLoaded } = useAuth()
 
-  if (!profile) {
+  // spin only while the fetch is in flight. Once it has resolved, a missing row
+  // (profile === null) means onboarding has not happened yet — send them there,
+  // do not spin forever.
+  if (!profileLoaded) {
     return (
       <div className="grid min-h-screen place-items-center bg-page">
         <div className="flex flex-col items-center gap-4">
@@ -18,6 +21,6 @@ export default function OnboardingGate({ children }) {
       </div>
     )
   }
-  if (!profile.onboarded) return <Navigate to="/onboarding" replace />
+  if (!profile || !profile.onboarded) return <Navigate to="/onboarding" replace />
   return children
 }

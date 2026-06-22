@@ -9,19 +9,22 @@ import Spinner from './Spinner'
 // picks their own. The temp password is single-use in practice: nothing else renders until
 // this is done. Sits outside OnboardingGate so the password change happens first.
 export default function PasswordChangeGate({ children }) {
-  const { profile, refreshProfile } = useAuth()
+  const { profile, profileLoaded, refreshProfile } = useAuth()
   const [pw, setPw] = useState('')
   const [confirm, setConfirm] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  if (!profile) {
+  // spin only while the fetch is in flight, never on a genuinely missing row.
+  if (!profileLoaded) {
     return (
       <div className="grid min-h-screen place-items-center bg-page">
         <div className="flex flex-col items-center gap-4"><Logo className="h-10 w-auto" /><Spinner size={24} /></div>
       </div>
     )
   }
+  // no profile row yet: nothing to force here — let OnboardingGate send them to /onboarding.
+  if (!profile) return children
   if (!profile.must_change_password) return children
 
   async function submit(e) {
