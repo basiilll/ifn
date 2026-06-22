@@ -129,6 +129,8 @@ services:
       db:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
+      mail-templates:
+        condition: service_started
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
@@ -178,6 +180,13 @@ services:
       GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${MAILER_URLPATHS_CONFIRMATION}
       GOTRUE_MAILER_URLPATHS_RECOVERY: ${MAILER_URLPATHS_RECOVERY}
       GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE}
+
+      # Custom branded password-reset (recovery) email — link only, drops the default OTP code line.
+      # GoTrue fetches the template body over HTTP (file:// is NOT supported by its mailme client),
+      # so it is served by the `mail-templates` sidecar on the internal network. Unset both vars to
+      # fall back to GoTrue's built-in default template.
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: ${MAILER_SUBJECTS_RECOVERY:-}
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: ${MAILER_TEMPLATES_RECOVERY:-}
 
       GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
       GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
@@ -249,6 +258,15 @@ services:
       # GOTRUE_HOOK_SEND_EMAIL_ENABLED: "false"
       # GOTRUE_HOOK_SEND_EMAIL_URI: "http://host.docker.internal:54321/functions/v1/email_sender"
       # GOTRUE_HOOK_SEND_EMAIL_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
+
+  # Tiny static server for GoTrue's branded email templates. GoTrue fetches template bodies over
+  # HTTP (file:// is unsupported), so the html in ./volumes/auth/templates is served here on the
+  # internal network as http://mail-templates/<name>.html (referenced by MAILER_TEMPLATES_* in .env).
+  mail-templates:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./volumes/auth/templates:/usr/share/nginx/html:ro,z
 
   rest:
     image: postgrest/postgrest:v14.12

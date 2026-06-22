@@ -45,6 +45,7 @@ Then make the first admin: Studio at http://localhost:8010 -> Authentication -> 
 | [docs/sql/commands.sql](docs/sql/commands.sql) | Ready-to-run SQL: make an admin, change roles, lock posting, health checks |
 | [docs/docker-sql.md](docs/docker-sql.md) | Running SQL from the terminal, every argument explained |
 | [docs/email-smtp.md](docs/email-smtp.md) | Setting up Resend for real password-reset emails |
+| [docs/changing-the-logo.md](docs/changing-the-logo.md) | Swapping the in-app logo, favicon, and email logo |
 
 ## Where things run
 

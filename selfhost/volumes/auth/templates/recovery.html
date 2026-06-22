@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reset your password</title>
+</head>
+<body style="margin:0;padding:0;background:#F7F5F2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F5F2;padding:32px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#ffffff;border-radius:12px;border:1px solid #ECE7E0;overflow:hidden;">
+          <!-- logo -->
+          <tr>
+            <td style="padding:32px 32px 0;text-align:center;">
+              <img src="{{ .SiteURL }}/email/icfai-founders.png" alt="ICFAI Founders Network" width="180" style="display:inline-block;height:auto;max-width:180px;border:0;">
+            </td>
+          </tr>
+          <!-- heading -->
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <h1 style="margin:0;font-size:20px;font-weight:800;color:#1A1A1A;">Reset your password</h1>
+            </td>
+          </tr>
+          <!-- body -->
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#4A4A4A;">
+                We received a request to reset the password for your ICFAI Founders Network
+                account. Click the button below to choose a new one. This link expires in 1 hour.
+              </p>
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="border-radius:8px;background:#E31E24;">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 28px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:8px;">Reset password</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:20px 0 0;font-size:13px;line-height:1.55;color:#8A8A8A;">
+                If you did not request this, you can safely ignore this email — your password will
+                stay the same.
+              </p>
+            </td>
+          </tr>
+          <!-- fallback link -->
+          <tr>
+            <td style="padding:20px 32px;border-top:1px solid #ECE7E0;">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#A0A0A0;">
+                Button not working? Copy and paste this link into your browser:<br>
+                <span style="color:#E31E24;word-break:break-all;">{{ .ConfirmationURL }}</span>
+              </p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:16px 0 0;font-size:12px;color:#B0AAA2;">ICFAI Founders Network</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
