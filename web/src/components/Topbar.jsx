@@ -60,7 +60,11 @@ export default function Topbar({ onMenu }) {
 
   function openNotif(n) {
     setBellOpen(false)
-    if (n.idea_id) navigate(`/pipeline/${n.idea_id}`)
+    if (n.idea_id) return navigate(`/pipeline/${n.idea_id}`)
+    if (['service_response', 'application_withdrawn', 'application_deleted'].includes(n.kind)) return navigate('/services')
+    if (['problem_solution_received', 'solution_reviewed'].includes(n.kind)) return navigate('/problems')
+    if (n.kind === 'registration_request') return navigate('/admin')
+    navigate('/notifications')
   }
 
   // The action/all/mine tabs are a mentor+ tool; regular members just see their full list.
@@ -98,13 +102,13 @@ export default function Topbar({ onMenu }) {
 
             {bellOpen && (
               <div className="absolute right-0 mt-2 w-96 overflow-hidden rounded-xl border border-line bg-card shadow-pop z-50">
-                <div className="border-b border-line px-4 py-2.5 flex items-center justify-between bg-surface">
+                <div className="border-b border-line px-4 py-2.5 flex items-center justify-between bg-page">
                   <span className="text-xs font-bold uppercase tracking-wide text-ink">Notifications</span>
                 </div>
 
                 {/* Tab bar: mentor+ only; members just see their own list */}
                 {isMentor && (
-                <div className="flex gap-1 p-2 border-b border-line bg-surface/50">
+                <div className="flex gap-1 p-2 border-b border-line bg-page/50">
                   <button 
                     onClick={() => setActiveFilter('action')}
                     className={`flex-1 text-center py-1 text-xs font-semibold rounded-md transition-colors ${activeFilter === 'action' ? 'bg-accent-soft text-accent border border-accent/20' : 'text-muted hover:bg-black/5'}`}
@@ -155,11 +159,11 @@ export default function Topbar({ onMenu }) {
                   )}
 
                   {/* Calendar view logic subset container */}
-                  <div className="bg-surface/40 border-t border-line px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-muted">Upcoming Events</div>
+                  <div className="bg-page/40 border-t border-line px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-muted">Upcoming Events</div>
                   {soon.length === 0 ? (
                     <div className="px-4 py-3 text-xs text-muted italic">No events scheduled this week.</div>
                   ) : (
-                    <ul className="py-0.5 bg-surface/20 divide-y divide-line/30">
+                    <ul className="py-0.5 bg-page/20 divide-y divide-line/30">
                       {soon.map((ev) => (
                         <li key={ev.id}>
                           <button onClick={() => { setBellOpen(false); navigate('/calendar') }} className="flex w-full items-start gap-2 px-4 py-2 text-left hover:bg-black/5">
