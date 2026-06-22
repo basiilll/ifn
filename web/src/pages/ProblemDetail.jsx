@@ -6,6 +6,7 @@ import { useAuth } from '../lib/AuthProvider'
 import AuthorLink from '../components/AuthorLink'
 import { MenuItem } from '../components/Dropdown'
 import ProblemModal from '../components/ProblemModal'
+import ConfirmModal from '../components/ConfirmModal'
 import { timeAgo } from '../lib/format'
 import { errMessage } from '../lib/errors'
 
@@ -83,6 +84,7 @@ export default function ProblemDetail() {
   const [ssort, setSsort] = useState('top')
   const [editingId, setEditingId] = useState(null)
   const [editBody, setEditBody] = useState('')
+  const [confirm, setConfirm] = useState(null)
   const [voteScore, setVoteScore] = useState(0)
   const [myVote, setMyVote] = useState(0)
   const [voting, setVoting] = useState(false)
@@ -162,8 +164,15 @@ export default function ProblemDetail() {
     refreshSolutions()
   }
 
-  async function deleteSolution(sid, mine) {
-    if (!window.confirm('Delete this solution?')) return
+  function confirmDeleteSolution(sid, mine) {
+    setConfirm({
+      title: 'Delete this solution?',
+      message: 'This cannot be undone.',
+      run: () => doDeleteSolution(sid, mine),
+    })
+  }
+
+  async function doDeleteSolution(sid, mine) {
     // own solutions delete via RLS; others (admin moderation) via the admin RPC
     const { error } = mine
       ? await supabase.from('problem_solutions').delete().eq('id', sid)
@@ -172,8 +181,15 @@ export default function ProblemDetail() {
     setSolutions((prev) => prev.filter((s) => s.id !== sid))
   }
 
-  async function deleteProblem() {
-    if (!window.confirm('Delete this problem? Its solutions go with it.')) return
+  function confirmDeleteProblem() {
+    setConfirm({
+      title: 'Delete this problem?',
+      message: 'The problem and all its solutions will be permanently removed. This cannot be undone.',
+      run: doDeleteProblem,
+    })
+  }
+
+  async function doDeleteProblem() {
     const { error } = problem.is_mine
       ? await supabase.from('problems').delete().eq('id', id)
       : await supabase.rpc('admin_delete_problem', { p_id: id })
@@ -250,7 +266,7 @@ export default function ProblemDetail() {
                       <MenuItem onClick={() => { close(); toggleClosed() }}>
                         {problem.closed ? 'Reopen problem' : 'Close problem'}
                       </MenuItem>
-                      <MenuItem onClick={() => { close(); deleteProblem() }}>
+                      <MenuItem onClick={() => { close(); confirmDeleteProblem() }}>
                         <span className="text-down">Delete problem</span>
                       </MenuItem>
                     </>
@@ -378,7 +394,7 @@ export default function ProblemDetail() {
                             {mine && editingId !== s.id && (
                               <button onClick={() => startEdit(s)} className="inline-flex min-h-9 items-center rounded px-1 text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">edit</button>
                             )}
-                            <button onClick={() => deleteSolution(s.id, mine)} className="inline-flex min-h-9 items-center rounded px-1 text-muted hover:text-down focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">delete</button>
+                            <button onClick={() => confirmDeleteSolution(s.id, mine)} className="inline-flex min-h-9 items-center rounded px-1 text-muted hover:text-down focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">delete</button>
                           </span>
                         )}
                       </div>
@@ -426,6 +442,16 @@ export default function ProblemDetail() {
               edit={problem}
               onClose={() => setEditOpen(false)}
               onSaved={() => { setEditOpen(false); load() }}
+            />
+          )}
+          {confirm && (
+            <ConfirmModal
+              title={confirm.title}
+              message={confirm.message}
+              confirmLabel="Delete"
+              tone="danger"
+              onConfirm={async () => { await confirm.run(); setConfirm(null) }}
+              onClose={() => setConfirm(null)}
             />
           )}
         </>

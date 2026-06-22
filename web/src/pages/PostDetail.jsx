@@ -190,8 +190,15 @@ export default function PostDetail() {
     setUpdates((prev) => prev.filter((s) => s.id !== sid))
   }
 
-  async function deletePost() {
-    if (!window.confirm('Delete this post? This cannot be undone.')) return
+  function confirmDeletePost() {
+    setConfirm({
+      title: 'Delete this post?',
+      message: 'This post and its comments will be permanently removed. This cannot be undone.',
+      run: doDeletePost,
+    })
+  }
+
+  async function doDeletePost() {
     // own post deletes via RLS; admin moderation uses the admin RPC
     const { error } = post.is_mine
       ? await supabase.from('posts').delete().eq('id', id)
@@ -294,7 +301,7 @@ export default function PostDetail() {
                           {post.comments_locked ? 'Turn comments on' : 'Turn comments off'}
                         </MenuItem>
                       )}
-                      <MenuItem onClick={() => { close(); deletePost() }}>
+                      <MenuItem onClick={() => { close(); confirmDeletePost() }}>
                         <span className="text-down">Delete post</span>
                       </MenuItem>
                     </>

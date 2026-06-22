@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import ModalShell from './ModalShell'
+import ConfirmModal from './ConfirmModal'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
 
@@ -25,6 +26,7 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [fieldErr, setFieldErr] = useState({})
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
   const titleRef = useRef(null)
   const descRef = useRef(null)
   const set = (k) => (e) => {
@@ -37,7 +39,7 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
     const dirty =
       JSON.stringify({ title: f.title, description: f.description, deadline: f.deadline, tags }) !== initialRef.current ||
       tagInput.trim() !== ''
-    if (dirty && !window.confirm(edit ? 'Discard your changes?' : 'Discard this problem? Your text will be lost.')) return
+    if (dirty) { setConfirmDiscard(true); return }
     onClose()
   }
 
@@ -76,6 +78,7 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
   }
 
   return (
+    <>
     <ModalShell onRequestClose={requestClose} labelledBy="problem-modal-title">
       <h2 id="problem-modal-title" className="text-lg font-bold">{edit ? 'Edit problem' : 'Post a problem'}</h2>
         <p className="mt-2 text-sm text-muted">Describe a real problem you face. Members reply with solutions; mentors score them.</p>
@@ -108,6 +111,17 @@ export default function ProblemModal({ edit, onClose, onSaved }) {
         </button>
       </div>
     </ModalShell>
+    {confirmDiscard && (
+      <ConfirmModal
+        title={edit ? 'Discard your changes?' : 'Discard this problem?'}
+        message="Your unsaved text will be lost."
+        confirmLabel="Discard"
+        tone="danger"
+        onConfirm={() => { setConfirmDiscard(false); onClose() }}
+        onClose={() => setConfirmDiscard(false)}
+      />
+    )}
+    </>
   )
 }
 
