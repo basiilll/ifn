@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, FileText, ArrowLeft } from 'lucide-react'
 import ModalShell from './ModalShell'
+import ConfirmModal from './ConfirmModal'
 import { supabase } from '../lib/supabase'
 import { timeAgo } from '../lib/format'
 import { errMessage } from '../lib/errors'
@@ -26,6 +27,8 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
   const [drafts, setDrafts] = useState([])
   const [view, setView] = useState('form') // 'form' | 'drafts'
   const [draft, setDraft] = useState(null) // the loaded draft being edited
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const [confirmDeleteDraft, setConfirmDeleteDraft] = useState(null) // draft id to delete
 
   async function fetchDrafts() {
     const { data } = await supabase
@@ -64,7 +67,7 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
     const dirty =
       view === 'form' &&
       (formSnap({ title, body, tags }) !== initialRef.current || tagInput.trim() !== '')
-    if (dirty && !window.confirm(isEdit ? 'Discard your changes?' : 'Discard this post? Your text will be lost.')) return
+    if (dirty) { setConfirmDiscard(true); return }
     onClose()
   }
 
@@ -83,7 +86,6 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
   }
 
   async function deleteDraft(id) {
-    if (!window.confirm('Delete this draft?')) return
     const { error: e } = await supabase.from('posts').delete().eq('id', id)
     if (e) { console.error(e); return setError('Could not delete the draft. Try again.') }
     fetchDrafts()
@@ -160,6 +162,7 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
   }
 
   return (
+    <>
     <ModalShell onRequestClose={close} labelledBy="create-post-title">
       <form onSubmit={(e) => { e.preventDefault(); save('published') }}>
         <div className="flex items-center justify-between gap-2">
@@ -199,7 +202,7 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
                   </button>
                   <button
                     type="button"
-                    onClick={() => deleteDraft(d.id)}
+                    onClick={() => setConfirmDeleteDraft(d.id)}
                     aria-label="Delete draft"
                     className="shrink-0 rounded-full p-1.5 text-faint transition-colors hover:bg-black/5 hover:text-down"
                   >
@@ -277,5 +280,26 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
         )}
       </form>
     </ModalShell>
+    {confirmDiscard && (
+      <ConfirmModal
+        title={isEdit ? 'Discard your changes?' : 'Discard this post?'}
+        message="Your unsaved text will be lost."
+        confirmLabel="Discard"
+        tone="danger"
+        onConfirm={() => { setConfirmDiscard(false); onClose() }}
+        onClose={() => setConfirmDiscard(false)}
+      />
+    )}
+    {confirmDeleteDraft && (
+      <ConfirmModal
+        title="Delete this draft?"
+        message="This cannot be undone."
+        confirmLabel="Delete"
+        tone="danger"
+        onConfirm={() => { deleteDraft(confirmDeleteDraft); setConfirmDeleteDraft(null) }}
+        onClose={() => setConfirmDeleteDraft(null)}
+      />
+    )}
+    </>
   )
 }
