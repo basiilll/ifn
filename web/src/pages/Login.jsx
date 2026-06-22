@@ -110,6 +110,8 @@ export default function Login() {
           <PasswordInput
             id="password" value={password}
             autoComplete="current-password"
+            ariaInvalid={invalidField === 'password' || undefined}
+            ariaDescribedby={error ? 'login-error' : undefined}
             onChange={(e) => { setPassword(e.target.value); if (invalidField === 'password') setInvalidField('') }}
           />
         </div>
