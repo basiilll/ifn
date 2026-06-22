@@ -57,6 +57,7 @@ function App() {
         <Route path="u/:id" element={<UserProfile />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="autopsy-library" element={<AutopsyLibrary />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   )
