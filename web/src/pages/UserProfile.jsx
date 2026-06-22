@@ -74,7 +74,7 @@ export default function UserProfile() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-extrabold">{profile.name || 'Unnamed'}</h1>
-              <MemberTypeBadge type={profile.member_type} />
+              <MemberTypeBadge types={profile.member_types} />
               {profile.incubation_interest && (
                 <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-accent">Open to incubation</span>
               )}

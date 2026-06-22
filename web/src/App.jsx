@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -10,7 +10,7 @@ import AdminPanel from './pages/AdminPanel'
 import Pipeline from './pages/Pipeline'
 import PipelineIdea from './pages/PipelineIdea'
 import MentorReview from './pages/MentorReview'
-import TeamAcquisition from './pages/TeamAcquisition'
+import Services from './pages/Services'
 import ProblemHub from './pages/ProblemHub'
 import ProblemDetail from './pages/ProblemDetail'
 import Calendar from './pages/Calendar'
@@ -47,7 +47,8 @@ function App() {
         <Route path="pipeline" element={<Pipeline />} />
         <Route path="pipeline/:id" element={<PipelineIdea />} />
         <Route path="mentor" element={<MentorReview />} />
-        <Route path="team" element={<TeamAcquisition />} />
+        <Route path="services" element={<Services />} />
+        <Route path="team" element={<Navigate to="/services" replace />} />
         <Route path="problem-hub" element={<ProblemHub />} />
         <Route path="problem-hub/:id" element={<ProblemDetail />} />
         <Route path="calendar" element={<Calendar />} />

@@ -23,6 +23,12 @@ export function errMessage(err, fallback = 'Something went wrong. Please try aga
   if (err.code === '42501' || /row-level security/i.test(raw)) {
     return 'You do not have permission to do that. If your account is read-only, contact an admin.'
   }
+  // GoTrue rejects reusing the current password (status 422, code 'same_password'). The raw
+  // message ("New password should be different from the old password") is vague for a first-login
+  // temp-password user; name the temp password explicitly.
+  if (err.code === 'same_password' || /different from the old password/i.test(raw)) {
+    return 'Your new password must be different from your temporary password.'
+  }
   // Our own raise_exception business rules: show the message, capitalized.
   if (err.code === 'P0001' && raw) return raw.charAt(0).toUpperCase() + raw.slice(1)
   return fallback

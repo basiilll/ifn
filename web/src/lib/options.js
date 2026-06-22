@@ -39,3 +39,7 @@ export const MEMBER_TYPES = [
 export function typeToRole(memberType) {
   return memberType === 'Mentor' ? 'mentor' : 'student'
 }
+// Multi-type form: any 'Mentor' among the selected labels suggests mentor access (override allowed).
+export function typesToRole(memberTypes) {
+  return Array.isArray(memberTypes) && memberTypes.includes('Mentor') ? 'mentor' : 'student'
+}

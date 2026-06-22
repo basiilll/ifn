@@ -12,3 +12,9 @@ export function timeAgo(iso) {
   if (d < 7) return `${d}d`
   return new Date(iso).toLocaleDateString()
 }
+
+// Whole days since `iso`. Lives here (not in a component) so the date read stays out of render.
+export function daysSince(iso) {
+  if (!iso) return 0
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
+}

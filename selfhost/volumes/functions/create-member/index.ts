@@ -39,17 +39,19 @@ Deno.serve(async (req) => {
   const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
   const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-  let email: unknown, role: unknown, memberTypeRaw: unknown, nameRaw: unknown
+  let email: unknown, role: unknown, memberTypesRaw: unknown, nameRaw: unknown
   try {
     const body = await req.json()
     email = body.email
     role = body.role
-    memberTypeRaw = body.member_type
+    memberTypesRaw = body.member_types
     nameRaw = body.name
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
-  const memberType = typeof memberTypeRaw === 'string' && memberTypeRaw.trim() ? memberTypeRaw.trim() : null
+  const memberTypes = Array.isArray(memberTypesRaw)
+    ? memberTypesRaw.filter((t): t is string => typeof t === 'string' && t.trim() !== '').map((t) => t.trim())
+    : []
   const name = typeof nameRaw === 'string' && nameRaw.trim() ? nameRaw.trim() : null
   if (typeof email !== 'string' || !/^\S+@\S+\.\S+$/.test(email)) {
     return json({ error: 'A valid email is required.' }, 400)
@@ -91,7 +93,7 @@ Deno.serve(async (req) => {
 
   // 3. Set role + member_type + optional name on the trigger-created profile row, and force a
   //    password change on first login (the temp password below is single-use in practice).
-  const patch: Record<string, unknown> = { role, member_type: memberType, must_change_password: true }
+  const patch: Record<string, unknown> = { role, member_types: memberTypes, member_type: memberTypes[0] ?? null, must_change_password: true }
   if (name) patch.name = name
   const { error: roleErr } = await admin
     .from('profiles')
@@ -105,5 +107,5 @@ Deno.serve(async (req) => {
   }
 
   // No email sent: the admin sends the welcome (with this password) via mailto from the UI.
-  return json({ ok: true, email: addr, role, name, member_type: memberType, password })
+  return json({ ok: true, email: addr, role, name, member_types: memberTypes, password })
 })

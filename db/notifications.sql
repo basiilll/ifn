@@ -58,7 +58,7 @@ language sql immutable
 as $$
   select case
     when p_kind in ('problem_solution_received', 'solution_reviewed') then 'problems'
-    when p_kind in ('application_withdrawn', 'application_deleted') then 'team'
+    when p_kind in ('application_withdrawn', 'application_deleted', 'service_response') then 'team'
     else 'pipeline'
   end
 $$;

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 // COMBINED ALL ICONS INTO ONE SINGLE CLEAN IMPORT BLOCK:
-import { Home, Workflow, Users, LayoutGrid, Shield, ClipboardCheck, FolderHeart, Puzzle } from 'lucide-react'
+import { Home, Workflow, HeartHandshake, LayoutGrid, Shield, ClipboardCheck, FolderHeart, Puzzle } from 'lucide-react'
 import { useAuth } from '../lib/AuthProvider'
 
 // Twitter-style left rail. Built sections are links; the rest are placeholders until built,
@@ -9,7 +9,7 @@ const ITEMS = [
   { to: '/', label: 'Feed', icon: Home, end: true },
   { to: '/pipeline', label: 'Idea Pipeline', icon: Workflow },
   { to: '/problem-hub', label: 'Problem Hub', icon: Puzzle },
-  { to: '/team', label: 'Team Acquisition', icon: Users },
+  { to: '/services', label: 'Services', icon: HeartHandshake },
   { to: '/directory', label: 'Directory', icon: LayoutGrid },
   { to: '/autopsy-library', label: 'Autopsy Library', icon: FolderHeart },
 ]

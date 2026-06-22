@@ -179,6 +179,7 @@ function ActivityList({ admin = false }) {
   function openTarget(n) {
     if (n.idea_id) navigate(`/pipeline/${n.idea_id}`)
     else if (n.payload?.post_id) navigate(`/post/${n.payload.post_id}`)
+    else if (n.kind === 'service_response') navigate('/services')
   }
 
   async function markRead(n) {
@@ -205,7 +206,7 @@ function ActivityList({ admin = false }) {
         <ul className="card divide-y divide-line">
           {rows.map((n) => {
             const open = openId === n.id
-            const target = n.idea_id || n.payload?.post_id
+            const target = n.idea_id || n.payload?.post_id || (n.kind === 'service_response' ? 'services' : null)
             return (
               <li key={n.id}>
                 <button
@@ -229,7 +230,7 @@ function ActivityList({ admin = false }) {
                   <div className="flex flex-wrap items-center gap-2 border-t border-line bg-page/60 px-4 py-3">
                     {target && (
                       <button className="btn-outline inline-flex min-h-9 items-center gap-1.5 px-3 py-1.5 text-xs" onClick={() => openTarget(n)}>
-                        <ExternalLink size={13} /> Open {n.idea_id ? 'application' : 'post'}
+                        <ExternalLink size={13} /> Open {n.idea_id ? 'application' : n.kind === 'service_response' ? 'Services' : 'post'}
                       </button>
                     )}
                     {!admin && !n.read_at && (

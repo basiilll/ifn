@@ -115,7 +115,7 @@ export default function Directory() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <AuthorLink id={m.id} className="truncate text-sm font-bold">{m.name || 'Unnamed'}</AuthorLink>
-                    <MemberTypeBadge type={m.member_type} />
+                    <MemberTypeBadge types={m.member_types} max={2} />
                     {m.pinned && (
                       <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-accent-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent">
                         <Pin size={10} /> Pinned

@@ -5,11 +5,12 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
 import MemberTypeBadge from '../components/MemberTypeBadge'
 import ConfirmModal from '../components/ConfirmModal'
+import { errMessage } from '../lib/errors'
 
 const NOTIF_ROWS = [
   { key: 'pipeline', label: 'Idea Pipeline', desc: 'Gate decisions, reviews, action items, and messages on your ideas.' },
   { key: 'problems', label: 'Problem Hub', desc: 'New solutions on your problems and reviews of your solutions.' },
-  { key: 'team', label: 'Team Acquisition', desc: 'Updates on applications to your role needs.' },
+  { key: 'team', label: 'Services', desc: 'Updates when someone responds to your offers or requests.' },
 ]
 
 export default function Settings() {
@@ -40,7 +41,7 @@ export default function Settings() {
     let active = true
     supabase
       .from('profiles')
-      .select('name, role, member_type, directory_visible, contactable, notification_prefs')
+      .select('name, role, member_types, directory_visible, contactable, notification_prefs')
       .eq('id', userId)
       .single()
       .then(({ data }) => {
@@ -100,7 +101,7 @@ export default function Settings() {
     setPwError('')
     const { error } = await supabase.auth.updateUser({ password: pw1 })
     setPwBusy(false)
-    if (error) { console.error(error); return setPwError(error.message || 'Could not update your password. Try again.') }
+    if (error) { console.error(error); return setPwError(errMessage(error, 'Could not update your password. Try again.')) }
     setPw1(''); setPw2(''); setPwOk(true)
   }
 
@@ -130,7 +131,7 @@ export default function Settings() {
               <>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">{profile?.name || 'Unnamed'}</span>
-                  <MemberTypeBadge type={profile?.member_type} />
+                  <MemberTypeBadge types={profile?.member_types} />
                 </div>
                 <div className="truncate text-sm text-muted">{email}</div>
               </>

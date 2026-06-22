@@ -123,7 +123,7 @@ export default function Profile() {
                 {(profile.name || '?').charAt(0).toUpperCase()}
               </div>
               <h2 className="mt-3 w-full break-words text-lg font-bold">{profile.name || 'Unnamed'}</h2>
-              <div className="mt-1"><MemberTypeBadge type={profile.member_type} /></div>
+              <div className="mt-1"><MemberTypeBadge types={profile.member_types} /></div>
               {profile.startup && <p className="mt-1 w-full break-words text-sm font-semibold text-muted">{profile.startup}</p>}
               {linkedinUrl(profile.linkedin) ? (
                 <a href={linkedinUrl(profile.linkedin)} target="_blank" rel="noopener noreferrer" className="btn-outline mt-4 w-full">
