@@ -201,11 +201,11 @@ export default function Settings() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-muted">New password</span>
-              <input className="input" type="password" autoComplete="new-password" value={pw1} onChange={(e) => setPw1(e.target.value)} placeholder="At least 8 characters" aria-invalid={!!pwError} aria-describedby={pwError ? 'pw-error' : undefined} />
+              <input className="input" type="password" autoComplete="new-password" value={pw1} onChange={(e) => { setPw1(e.target.value); if (pwError) setPwError('') }} placeholder="At least 8 characters" aria-invalid={!!pwError} aria-describedby={pwError ? 'pw-error' : undefined} />
             </label>
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-muted">Confirm new password</span>
-              <input className="input" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder="Repeat it" aria-invalid={!!pwError} aria-describedby={pwError ? 'pw-error' : undefined} />
+              <input className="input" type="password" autoComplete="new-password" value={pw2} onChange={(e) => { setPw2(e.target.value); if (pwError) setPwError('') }} placeholder="Repeat it" aria-invalid={!!pwError} aria-describedby={pwError ? 'pw-error' : undefined} />
             </label>
           </div>
           <div className="flex justify-end">
