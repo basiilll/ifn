@@ -628,7 +628,7 @@ function PostModal({ kind, edit, onClose, onSaved }) {
         </L>
       </div>
       <div className="mt-5 flex justify-end gap-2">
-        <button className="btn-ghost" onClick={onClose} disabled={busy}>Cancel</button>
+        <button className="btn-ghost" onClick={requestClose} disabled={busy}>Cancel</button>
         <button className="btn-primary" disabled={busy} onClick={submit}>
           {busy ? 'Saving...' : edit ? 'Save changes' : 'Post'}
         </button>
