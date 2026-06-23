@@ -219,7 +219,7 @@ export default function AutopsyLibrary() {
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <h2 className="min-w-0 break-words text-xl font-bold text-ink">{autopsy.project_name}</h2>
-                  <span className="chip max-w-[45%] shrink-0 break-words">{capCategory(autopsy.category)}</span>
+                  <span title={autopsy.category} className="inline-block max-w-[40%] shrink-0 truncate rounded-md bg-accent-soft px-2 py-0.5 align-middle text-xs font-semibold text-accent ring-1 ring-accent/15">{capCategory(autopsy.category)}</span>
                 </div>
 
                 <div className="mb-4 rounded-lg border border-down/20 bg-down/10 p-4">
@@ -356,7 +356,7 @@ export default function AutopsyLibrary() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="autopsy-cat" className="text-xs font-medium text-muted">Category *</label>
-                  <Combobox value={category} onChange={setCategory} options={SECTORS} placeholder="Select sector..." id="autopsy-cat" />
+                  <Combobox value={category} onChange={setCategory} options={SECTORS} placeholder="Select sector..." id="autopsy-cat" maxLength={60} />
                 </div>
               </div>
 
