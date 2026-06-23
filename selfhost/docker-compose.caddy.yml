@@ -55,6 +55,7 @@ services:
     volumes:
       - ./volumes/proxy/caddy:/etc/caddy
       - ../web/dist:/srv/app:ro
+      - /etc/caddy-certs:/etc/caddy-certs:ro
       - caddy_data:/data
       - caddy_config:/config
 

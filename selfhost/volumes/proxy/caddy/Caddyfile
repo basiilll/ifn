@@ -1,6 +1,12 @@
 {$PROXY_DOMAIN} {
     encode gzip zstd
 
+    # Cloudflare Origin certificate (15-yr, trusted by CF in Full(strict) mode). Replaces
+    # ACME/Let's Encrypt: once the origin is firewalled to Cloudflare IPs only, Caddy can no
+    # longer reach LE to renew, so we serve a long-lived CF origin cert instead. Direct (non-CF)
+    # visitors get an untrusted cert by design — they should be blocked at the firewall anyway.
+    tls /etc/caddy-certs/origin.crt /etc/caddy-certs/origin.key
+
     # Supabase API gateway: supabase-js calls these path prefixes. Forward to Kong
     # over the internal docker network (Kong has no public port behind Caddy).
     @supabase_api path /auth/v1/* /rest/v1/* /graphql/v1 /realtime/v1/* /storage/v1/* /functions/v1/* /sso/*
