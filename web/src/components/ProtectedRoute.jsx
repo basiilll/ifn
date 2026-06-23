@@ -1,13 +1,15 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
 import Logo from './Logo'
 import Spinner from './Spinner'
 
 // Gate for authed-only routes. While the initial session check runs, show a branded
-// full-page loader (not a blank screen). No session means bounce to login.
+// full-page loader (not a blank screen). No session means bounce to login, carrying the
+// attempted location so a deep link lands back on itself after sign-in instead of the feed.
 export default function ProtectedRoute({ children }) {
   const { session, loading, banned } = useAuth()
+  const location = useLocation()
 
   if (loading) {
     return (
@@ -19,7 +21,7 @@ export default function ProtectedRoute({ children }) {
       </div>
     )
   }
-  if (!session) return <Navigate to="/login" replace />
+  if (!session) return <Navigate to="/login" state={{ from: location }} replace />
   if (banned) {
     return (
       <div className="grid min-h-screen place-items-center bg-page px-6">

@@ -15,15 +15,16 @@ export function AuthProvider({ children }) {
   const [profileLoaded, setProfileLoaded] = useState(false)
 
   useEffect(() => {
-    // 1. read the persisted session once on load (Supabase keeps it in localStorage)
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setLoading(false)
-    })
-
-    // 2. keep it live: fires on sign in, sign out, token refresh, and email confirm
+    // onAuthStateChange is the single source of truth. On init it emits an INITIAL_SESSION
+    // event carrying the restored session AFTER the client has finished reading/refreshing it
+    // from localStorage, then fires again on sign in, sign out, token refresh, and email
+    // confirm. We clear `loading` on the first event (not on getSession) on purpose: a bare
+    // getSession().then() could resolve null a tick before the stored session was ready, which
+    // flipped loading=false with session=null and bounced every hard refresh of a deep route to
+    // /login and then home. Reading the session off this event removes that race.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
+      setLoading(false)
     })
 
     return () => sub.subscription.unsubscribe()
@@ -43,13 +44,17 @@ export function AuthProvider({ children }) {
   // the server re-checks is_admin() inside every admin RPC.
   useEffect(() => {
     let active = true
-    if (!uid) { setProfile(null); setProfileLoaded(true); return }
+    // No uid: either auth is still settling (loading) or the user is genuinely logged out.
+    // Only claim profileLoaded once auth has settled — otherwise the gate would see a
+    // stale profileLoaded=true with profile=null during session restore and bounce a deep
+    // link to /onboarding (then back to /), dropping the destination.
+    if (!uid) { setProfile(null); setProfileLoaded(!loading); return }
     setProfileLoaded(false)
     supabase.from('profiles').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
       if (active) { setProfile(data || null); setProfileLoaded(true) }
     })
     return () => { active = false }
-  }, [uid])
+  }, [uid, loading])
 
   return (
     <AuthContext.Provider

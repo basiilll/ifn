@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/AuthProvider'
 import Logo from './Logo'
 import Spinner from './Spinner'
@@ -7,6 +7,7 @@ import Spinner from './Spinner'
 // /onboarding before they can use anything. Waits for the profile row to load first.
 export default function OnboardingGate({ children }) {
   const { profile, profileLoaded } = useAuth()
+  const location = useLocation()
 
   // spin only while the fetch is in flight. Once it has resolved, a missing row
   // (profile === null) means onboarding has not happened yet — send them there,
@@ -21,6 +22,6 @@ export default function OnboardingGate({ children }) {
       </div>
     )
   }
-  if (!profile || !profile.onboarded) return <Navigate to="/onboarding" replace />
+  if (!profile || !profile.onboarded) return <Navigate to="/onboarding" state={{ from: location }} replace />
   return children
 }

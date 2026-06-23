@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { supabase } from '../lib/supabase'
 import { authErrorMessage, isRateLimitError } from '../lib/authErrors'
@@ -24,6 +24,10 @@ export default function Login() {
   const turnstileRef = useRef(null)
   const errorRef = useRef(null)
   const navigate = useNavigate()
+  const location = useLocation()
+  // Where ProtectedRoute bounced us from, so signing in returns to the deep link not the feed.
+  const from = location.state?.from
+  const postLoginDest = from ? `${from.pathname}${from.search || ''}` : '/'
 
   // Turnstile tokens are single-use: GoTrue spends the token on every signin attempt, so a
   // failed login (wrong password) leaves a stale, already-consumed token. Re-mint a fresh one
@@ -78,7 +82,7 @@ export default function Login() {
         requestAnimationFrame(() => errorRef.current?.focus())
         return
       }
-      navigate('/', { replace: true })
+      navigate(postLoginDest, { replace: true })
     } catch {
       resetCaptcha()
       setError('Something went wrong. Please try again.')

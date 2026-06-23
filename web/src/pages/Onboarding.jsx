@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
 import { linkedinHandle } from '../lib/linkedin'
@@ -9,8 +9,14 @@ import Combobox from '../components/Combobox'
 
 export default function Onboarding() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { session, profile, refreshProfile } = useAuth()
   const email = session?.user?.email
+  // If we were sent here only to pass through (already onboarded), go back to the
+  // route that bounced us, not a hard-coded home.
+  const onboardedDest = location.state?.from
+    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+    : '/'
 
   const [form, setForm] = useState({
     name: '', startup: '', region: '', sector: '', domain: '',
@@ -30,7 +36,7 @@ export default function Onboarding() {
   }, [profile, seeded])
 
   // already onboarded -> nothing to do here
-  if (profile?.onboarded) return <Navigate to="/" replace />
+  if (profile?.onboarded) return <Navigate to={onboardedDest} replace />
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
 
@@ -71,7 +77,7 @@ export default function Onboarding() {
     }).eq('id', session.user.id)
     if (e2) { console.error(e2); setSaving(false); return setError('Something went wrong. Please try again.') }
     await refreshProfile()
-    navigate('/', { replace: true })
+    navigate(onboardedDest, { replace: true })
   }
 
   return (
