@@ -1,18 +1,29 @@
 {$PROXY_DOMAIN} {
-    @supabase_api path /auth/v1/* /rest/v1/* /graphql/v1 /realtime/v1/* /storage/v1/* /functions/v1/* /mcp /sso/*
+    encode gzip zstd
 
+    # Supabase API gateway: supabase-js calls these path prefixes. Forward to Kong
+    # over the internal docker network (Kong has no public port behind Caddy).
+    @supabase_api path /auth/v1/* /rest/v1/* /graphql/v1 /realtime/v1/* /storage/v1/* /functions/v1/* /sso/*
     handle @supabase_api {
         reverse_proxy kong:8000
     }
 
+    # Everything else: the built member app (web/dist, mounted at /srv/app).
+    # SPA fallback so deep links and hard refresh resolve to index.html.
     handle {
-        basic_auth {
-            # PROXY_AUTH_PASSWORD is overwritten with the bcrypt on startup
-            {$PROXY_AUTH_USERNAME} {$PROXY_AUTH_PASSWORD}
-        }
-
-        reverse_proxy studio:3000
+        root * /srv/app
+        try_files {path} /index.html
+        file_server
     }
 
-    header -server
+    # Security headers (docs/security.md layer 3). HSTS preload matches the .app
+    # TLD, which is already HSTS-preloaded so HTTPS is mandatory for this domain.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        -Server
+    }
 }

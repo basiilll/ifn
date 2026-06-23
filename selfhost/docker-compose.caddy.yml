@@ -18,6 +18,20 @@ services:
     environment:
       KONG_PORT_MAPS: "443:8000,443:8443"
 
+  # Studio is NOT public. Publish on loopback only so it can be reached from the
+  # host (e.g. fronted by `tailscale serve` for admin over the tailnet), never
+  # from the LAN or the internet.
+  studio:
+    ports:
+      - "127.0.0.1:8003:3000"
+
+  # Postgres / connection pooler: loopback only. Direct DB access goes over
+  # Tailscale (SSH tunnel or `tailscale serve`), never the public internet.
+  supavisor:
+    ports: !override
+      - "127.0.0.1:5443:5432"
+      - "127.0.0.1:${POOLER_PROXY_PORT_TRANSACTION}:6543"
+
   caddy:
     container_name: supabase-caddy
     image: caddy:2
@@ -35,16 +49,12 @@ services:
         condition: service_healthy
     environment:
       PROXY_DOMAIN: ${PROXY_DOMAIN}
-      PROXY_AUTH_USERNAME: ${DASHBOARD_USERNAME}
-      PROXY_AUTH_PASSWORD: ${DASHBOARD_PASSWORD}
-    command:
-      - /bin/sh
-      - -c
-      - |
-        PROXY_AUTH_PASSWORD=$$(caddy hash-password --plaintext "$$PROXY_AUTH_PASSWORD") && \
-        caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    # Caddy serves the built app at / and proxies the Supabase API paths to Kong.
+    # No basic_auth: the dashboard is no longer public (see studio loopback bind above).
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
     volumes:
       - ./volumes/proxy/caddy:/etc/caddy
+      - ../web/dist:/srv/app:ro
       - caddy_data:/data
       - caddy_config:/config
 
