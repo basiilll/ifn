@@ -336,10 +336,10 @@ export default function AdminPanel() {
             <div className="card divide-y divide-line">
               {autopsies.map((item) => (
                 <div key={item.id} className="p-4 flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-sm font-bold text-ink">{item.project_name}</h3>
-                      <div className="text-xs text-muted mt-0.5">Sector: {item.category} · Domain: {item.domain} · Duration: {item.duration || 'N/A'}</div>
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-ink break-words">{item.project_name}</h3>
+                      <div className="text-xs text-muted mt-0.5 break-words">Sector: {item.category} · Domain: {item.domain} · Duration: {item.duration || 'N/A'}</div>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <button className="btn min-h-9 border border-success/40 text-success hover:bg-success/10 text-xs font-bold px-3 py-1.5 rounded-md" disabled={busyId === item.id} onClick={() => handleApproveAutopsy(item.id)}>Approve</button>
@@ -347,8 +347,8 @@ export default function AdminPanel() {
                       <button className="btn min-h-9 border border-line text-faint hover:text-down hover:border-down/40 text-xs font-bold px-3 py-1.5 rounded-md" disabled={busyId === item.id} onClick={() => handleDeleteAutopsy(item.id, item.project_name)}>Delete</button>
                     </div>
                   </div>
-                  <div className="text-xs text-ink bg-black/5 p-2.5 rounded-md mt-1"><strong>Why it failed:</strong> {item.root_cause}</div>
-                  {item.story && <div className="text-xs text-muted italic pl-1"><strong>The Story:</strong> {item.story}</div>}
+                  <div className="text-xs text-ink bg-black/5 p-2.5 rounded-md mt-1 whitespace-pre-wrap break-words"><strong>Why it failed:</strong> {item.root_cause}</div>
+                  {item.story && <div className="text-xs text-muted italic pl-1 whitespace-pre-wrap break-words"><strong>The Story:</strong> {item.story}</div>}
                 </div>
               ))}
             </div>

@@ -9,6 +9,17 @@ import Combobox from '../components/Combobox';
 import ModalShell from '../components/ModalShell';
 import ConfirmModal from '../components/ConfirmModal';
 
+// Category is meant to be a short sector label. Cap it at 10 words (and 80 chars as a
+// backstop for a single space-less blob) so bad/seeded data can't blow out the card.
+const capCategory = (s) => {
+  const t = (s || '').trim();
+  const words = t.split(/\s+/);
+  let out = words.length > 10 ? words.slice(0, 10).join(' ') : t;
+  const truncated = words.length > 10 || out.length > 80;
+  if (out.length > 80) out = out.slice(0, 80);
+  return truncated ? out + '…' : out;
+};
+
 export default function AutopsyLibrary() {
   usePageTitle('Autopsy Library')
   const { session, isAdmin } = useAuth();
@@ -76,7 +87,7 @@ export default function AutopsyLibrary() {
         {
           user_id: userData?.user?.id,
           project_name: projectName,
-          category,
+          category: capCategory(category),
           domain,
           duration,
           total_investment: investment,
@@ -207,21 +218,21 @@ export default function AutopsyLibrary() {
                 className="card p-6 transition-colors hover:border-accent/40"
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
-                  <h2 className="text-xl font-bold text-ink">{autopsy.project_name}</h2>
-                  <span className="chip shrink-0">{autopsy.category}</span>
+                  <h2 className="min-w-0 break-words text-xl font-bold text-ink">{autopsy.project_name}</h2>
+                  <span className="chip max-w-[45%] shrink-0 break-words">{capCategory(autopsy.category)}</span>
                 </div>
 
                 <div className="mb-4 rounded-lg border border-down/20 bg-down/10 p-4">
                   <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-down">
                     Why it failed
                   </span>
-                  <p className="text-sm font-medium text-ink">{autopsy.root_cause}</p>
+                  <p className="whitespace-pre-wrap break-words text-sm font-medium text-ink">{autopsy.root_cause}</p>
                 </div>
 
                 {lessons.length > 0 && (
                   <div className="mb-4">
                     <span className="mb-1 block text-sm font-bold text-ink">Key lessons</span>
-                    <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
+                    <ul className="list-disc space-y-1 break-words pl-5 text-sm text-muted">
                       {lessons.slice(0, 3).map((lesson, idx) => (
                         <li key={idx}>{lesson}</li>
                       ))}
@@ -230,8 +241,8 @@ export default function AutopsyLibrary() {
                 )}
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-xs text-muted">
-                  <div className="flex flex-wrap gap-x-4 gap-y-1">
-                    <span>Investment: <strong className="font-semibold text-ink">{autopsy.total_investment || 'N/A'}</strong></span>
+                  <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 break-words">
+                    <span className="min-w-0 break-words">Investment: <strong className="font-semibold text-ink">{autopsy.total_investment || 'N/A'}</strong></span>
                     <span>Duration: <strong className="font-semibold text-ink">{autopsy.duration || 'N/A'}</strong></span>
                     <span>By: <strong className="font-semibold text-ink">{autopsy.is_anonymous ? 'Anonymous' : 'Contributor'}</strong></span>
                   </div>
@@ -268,10 +279,10 @@ export default function AutopsyLibrary() {
         >
           <div>
             <div className="mb-5 flex items-start justify-between gap-3">
-              <div>
-                <h2 id="autopsy-detail-title" className="text-2xl font-bold text-ink">{reading.project_name}</h2>
-                <p className="mt-1 text-sm text-muted">
-                  {reading.category}{reading.domain ? ` · ${reading.domain}` : ''}
+              <div className="min-w-0">
+                <h2 id="autopsy-detail-title" className="break-words text-2xl font-bold text-ink">{reading.project_name}</h2>
+                <p className="mt-1 break-words text-sm text-muted">
+                  {capCategory(reading.category)}{reading.domain ? ` · ${reading.domain}` : ''}
                 </p>
               </div>
               <button
@@ -291,20 +302,20 @@ export default function AutopsyLibrary() {
               ].map(([label, value]) => (
                 <div key={label}>
                   <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
-                  <dd className="mt-0.5 text-sm font-semibold text-ink">{value}</dd>
+                  <dd className="mt-0.5 break-words text-sm font-semibold text-ink">{value}</dd>
                 </div>
               ))}
             </dl>
 
             <section className="mb-6 rounded-lg border border-down/20 bg-down/10 p-4">
               <h3 className="mb-1 text-xs font-bold uppercase tracking-wide text-down">Root cause</h3>
-              <p className="text-sm font-medium text-ink">{reading.root_cause}</p>
+              <p className="whitespace-pre-wrap break-words text-sm font-medium text-ink">{reading.root_cause}</p>
             </section>
 
             {reading.story && (
               <section className="mb-6">
                 <h3 className="mb-2 text-sm font-bold text-ink">The story</h3>
-                <p className="whitespace-pre-line text-sm leading-relaxed text-muted [text-wrap:pretty]">
+                <p className="whitespace-pre-line break-words text-sm leading-relaxed text-muted [text-wrap:pretty]">
                   {reading.story}
                 </p>
               </section>
@@ -313,7 +324,7 @@ export default function AutopsyLibrary() {
             {lessonsOf(reading).length > 0 && (
               <section>
                 <h3 className="mb-2 text-sm font-bold text-ink">Key lessons</h3>
-                <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted">
+                <ul className="list-disc space-y-1.5 break-words pl-5 text-sm text-muted">
                   {lessonsOf(reading).map((lesson, idx) => (
                     <li key={idx}>{lesson}</li>
                   ))}

@@ -4,7 +4,10 @@ import { ChevronDown } from 'lucide-react'
 // Editable combobox: type to filter AND pick from the dropdown at the same time. The typed
 // text IS the value (free entry allowed), so it works for free-text fields like region/state.
 // Matches the app's `input` styling.
-export default function Combobox({ value, onChange, options, placeholder = '', id, maxLength = 80, required = false }) {
+// maxLength default 60: sector/domain/region are short single labels. The longest predefined
+// option is a 40-char region ("Dadra and Nagar Haveli and Daman and Diu"), so 60 clears every
+// list value with headroom for free-text entries while keeping these fields from holding prose.
+export default function Combobox({ value, onChange, options, placeholder = '', id, maxLength = 60, required = false }) {
   const [open, setOpen] = useState(false)
   const [hi, setHi] = useState(-1) // highlighted index
   const wrapRef = useRef(null)
