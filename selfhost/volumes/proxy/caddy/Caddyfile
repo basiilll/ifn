@@ -32,4 +32,12 @@
         Permissions-Policy "geolocation=(), microphone=(), camera=()"
         -Server
     }
+
+    # Caching (NIC checklist "Other" item 6: pages must not be served from history/cache).
+    # The HTML shell and every API response are no-store so a new deploy and per-user auth
+    # state are never stale; content-hashed build assets + self-hosted fonts are immutable.
+    @static path /assets/* /fonts/*
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    @dynamic not path /assets/* /fonts/*
+    header @dynamic Cache-Control "no-store"
 }

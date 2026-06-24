@@ -147,6 +147,12 @@ services:
       GOTRUE_SECURITY_CAPTCHA_PROVIDER: ${CAPTCHA_PROVIDER:-turnstile}
       GOTRUE_SECURITY_CAPTCHA_SECRET: ${CAPTCHA_SECRET:-}
 
+      # Password policy (NIC secure-code checklist item 13). Server-side floor — the client
+      # already asks for >=8, but the anon key can POST straight to GoTrue, so enforce here.
+      # REQUIRED_CHARACTERS is colon-separated classes; a password must include one from each.
+      GOTRUE_PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-8}
+      GOTRUE_PASSWORD_REQUIRED_CHARACTERS: ${PASSWORD_REQUIRED_CHARACTERS:-abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789}
+
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
