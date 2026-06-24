@@ -1,14 +1,16 @@
-// App logo = the ICFAI Founders Network logo (src/assets/ifn-logo.png). Raster image
-// (from the supplied JPG) rendered via <img>; size it with className (set a height,
-// width follows the aspect ratio). Used in ~9 spots — login, onboarding, headers, spinners.
-import logoUrl from '../assets/ifn-logo.png'
+// App logo = the ICFAI Founders Network lockup (monogram + wordmark + tagline).
+// Two transparent PNG variants so it sits cleanly on any background:
+//   - ifn-logo.png      dark text, for light mode
+//   - ifn-logo-dark.png white/red text, for dark mode
+// Swapped via Tailwind's `dark` class (darkMode: 'class'). Size with className (height).
+import logoLight from '../assets/ifn-logo.png'
+import logoDark from '../assets/ifn-logo-dark.png'
 
 export default function Logo({ className = '' }) {
   return (
-    <img
-      src={logoUrl}
-      className={className}
-      alt="ICFAI Founders Network"
-    />
+    <>
+      <img src={logoLight} className={`${className} dark:hidden`} alt="ICFAI Founders Network" />
+      <img src={logoDark} className={`hidden dark:block ${className}`} alt="ICFAI Founders Network" />
+    </>
   )
 }
