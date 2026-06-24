@@ -1,14 +1,14 @@
-// App logo = the ICFAI Founders Network wordmark (src/assets/icfai-founders.svg). The big
-// "ICFAI" letters use currentColor, so they're tinted with the brand accent; the red bar
-// and the reversed "FOUNDERS NETWORK" carry their own fixed colors. Size via className.
-import LogoSvg from '../assets/icfai-founders.svg?react'
+// App logo = the ICFAI Founders Network logo (src/assets/ifn-logo.png). Raster image
+// (from the supplied JPG) rendered via <img>; size it with className (set a height,
+// width follows the aspect ratio). Used in ~9 spots — login, onboarding, headers, spinners.
+import logoUrl from '../assets/ifn-logo.png'
 
 export default function Logo({ className = '' }) {
   return (
-    <LogoSvg
-      className={`text-accent ${className}`}
-      role="img"
-      aria-label="ICFAI Founders Network"
+    <img
+      src={logoUrl}
+      className={className}
+      alt="ICFAI Founders Network"
     />
   )
 }
