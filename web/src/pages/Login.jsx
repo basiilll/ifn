@@ -156,7 +156,15 @@ export default function Login() {
         </button>
 
         <p className="mt-4 text-center text-sm text-muted">
-          Accounts are created by an admin. Contact the IFN team to be added.
+          Accounts are created by an admin.{' '}
+          <a
+            href="https://iiec.ifheindia.org/about-us/icfai-founders-network#"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-accent hover:underline"
+          >
+            Register here
+          </a>
         </p>
       </form>
     </main>
