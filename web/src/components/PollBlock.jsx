@@ -21,6 +21,7 @@ export default function PollBlock({ postId }) {
 
   const iVoted = options?.some((o) => o.my_choice)
   const total = options?.reduce((s, o) => s + Number(o.votes), 0) || 0
+  const allowMultiple = options?.[0]?.allow_multiple ?? false
 
   async function vote(e, optionId) {
     e.stopPropagation()
@@ -65,7 +66,9 @@ export default function PollBlock({ postId }) {
         )
       })}
       <div className="flex items-center gap-2 text-xs text-muted">
-        {iVoted ? `${total} ${total === 1 ? 'vote' : 'votes'} · tap to change` : 'Tap an option to vote and see results'}
+        {iVoted
+          ? `${total} ${total === 1 ? 'vote' : 'votes'} · ${allowMultiple ? 'tap to add or remove' : 'tap to change'}`
+          : allowMultiple ? 'Select all that apply to see results' : 'Tap an option to vote and see results'}
         {err && <span className="font-semibold text-down">· {err}</span>}
       </div>
     </div>

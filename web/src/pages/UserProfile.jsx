@@ -59,7 +59,8 @@ export default function UserProfile() {
     )
   }
 
-  const chips = [profile.region, profile.sector, profile.domain].filter(Boolean)
+  const toArr = (v) => Array.isArray(v) ? v : v ? [v] : []
+  const chips = [...toArr(profile.region), ...toArr(profile.sector), ...toArr(profile.domain)]
   return (
     <div className="max-w-2xl">
       <button onClick={goBack} className="mb-4 -ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-semibold text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">

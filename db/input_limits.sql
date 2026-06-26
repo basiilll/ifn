@@ -9,12 +9,12 @@
 -- profiles
 alter table public.profiles drop constraint if exists chk_profiles_name_len;
 alter table public.profiles add  constraint chk_profiles_name_len            check (name is null              or char_length(name) <= 120);
+-- region/sector/domain are text[] (see db/multiselect_profile.sql), which owns their
+-- array-aware length bounds. Only drop the old scalar char_length() checks here so an
+-- upgrade from a pre-array DB is clean; do NOT re-add them (char_length(text[]) is invalid).
 alter table public.profiles drop constraint if exists chk_profiles_region_len;
-alter table public.profiles add  constraint chk_profiles_region_len          check (region is null            or char_length(region) <= 80);
 alter table public.profiles drop constraint if exists chk_profiles_sector_len;
-alter table public.profiles add  constraint chk_profiles_sector_len          check (sector is null            or char_length(sector) <= 80);
 alter table public.profiles drop constraint if exists chk_profiles_domain_len;
-alter table public.profiles add  constraint chk_profiles_domain_len          check (domain is null            or char_length(domain) <= 80);
 alter table public.profiles drop constraint if exists chk_profiles_member_type_len;
 alter table public.profiles add  constraint chk_profiles_member_type_len     check (member_type is null       or char_length(member_type) <= 60);
 alter table public.profiles drop constraint if exists chk_profiles_linkedin_len;

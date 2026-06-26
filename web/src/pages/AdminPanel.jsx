@@ -7,7 +7,7 @@ import { errMessage } from '../lib/errors'
 import { linkedinHandle } from '../lib/linkedin'
 import ModalShell from '../components/ModalShell'
 import ConfirmModal from '../components/ConfirmModal'
-import Combobox from '../components/Combobox'
+import MultiSelect from '../components/MultiSelect'
 import { useAuth } from '../lib/AuthProvider'
 import { REGIONS, SECTORS, DOMAINS, typeToRole, typesToRole } from '../lib/options'
 import MemberTypeChips from '../components/MemberTypeChips'
@@ -811,7 +811,7 @@ function AdminEditProfileModal({ member, onClose, onSaved }) {
     supabase.rpc('admin_get_profile', { p_user: member.id }).then(({ data, error: e }) => {
       if (e || !data?.[0]) { setError(GENERIC_ERR); setForm({}); return }
       const p = data[0]
-      setForm({ name: p.name || '', phone: p.phone || '', bio: p.bio || '', startup: p.startup || '', region: p.region || '', sector: p.sector || '', domain: p.domain || '', linkedin: p.linkedin || '', incubation_interest: !!p.incubation_interest, member_types: p.member_types || [], role: member.role })
+      setForm({ name: p.name || '', phone: p.phone || '', bio: p.bio || '', startup: p.startup || '', region: p.region || [], sector: p.sector || [], domain: p.domain || [], linkedin: p.linkedin || '', incubation_interest: !!p.incubation_interest, member_types: p.member_types || [], role: member.role })
     })
   }, [member.id])
 
@@ -820,7 +820,7 @@ function AdminEditProfileModal({ member, onClose, onSaved }) {
   async function save() {
     if (!form.name.trim()) return setError('Name is required.')
     setBusy(true)
-    const { error: e } = await supabase.rpc('admin_update_profile', { p_user: member.id, p_name: form.name.trim(), p_phone: form.phone.trim() || null, p_bio: form.bio.trim() || null, p_startup: form.startup.trim() || null, p_region: form.region || null, p_sector: form.sector || null, p_domain: form.domain || null, p_linkedin: linkedinHandle(form.linkedin) || null, p_incubation: form.incubation_interest, p_member_types: form.member_types || [] })
+    const { error: e } = await supabase.rpc('admin_update_profile', { p_user: member.id, p_name: form.name.trim(), p_phone: form.phone.trim() || null, p_bio: form.bio.trim() || null, p_startup: form.startup.trim() || null, p_region: form.region?.length ? form.region : [], p_sector: form.sector?.length ? form.sector : [], p_domain: form.domain?.length ? form.domain : [], p_linkedin: linkedinHandle(form.linkedin) || null, p_incubation: form.incubation_interest, p_member_types: form.member_types || [] })
     if (e) { console.error(e); setBusy(false); return setError('Could not save the profile.') }
     // Permission level is a separate, admin-only grant (never your own); apply it if changed.
     let savedRole = member.role
@@ -844,9 +844,9 @@ function AdminEditProfileModal({ member, onClose, onSaved }) {
             <Field label="Phone"><input className="input" maxLength={20} value={form.phone} onChange={set('phone')} /></Field>
             <Field label="Startup"><input className="input" maxLength={80} value={form.startup} onChange={set('startup')} /></Field>
             <Field label="LinkedIn"><input className="input" maxLength={200} value={form.linkedin} onChange={set('linkedin')} placeholder="handle or linkedin.com/in/ URL" /></Field>
-            <Field label="Region"><Combobox value={form.region} onChange={(v) => setForm({ ...form, region: v })} options={REGIONS} placeholder="Select or type a state" /></Field>
-            <Field label="Sector"><Combobox value={form.sector} onChange={(v) => setForm({ ...form, sector: v })} options={SECTORS} placeholder="Search or type a sector" /></Field>
-            <Field label="Domain"><Combobox value={form.domain} onChange={(v) => setForm({ ...form, domain: v })} options={DOMAINS} placeholder="Search or type a domain" /></Field>
+            <Field label="Region"><MultiSelect value={form.region} onChange={(v) => setForm({ ...form, region: v })} options={REGIONS} placeholder="Select one or more states" /></Field>
+            <Field label="Sector"><MultiSelect value={form.sector} onChange={(v) => setForm({ ...form, sector: v })} options={SECTORS} placeholder="Select one or more sectors" /></Field>
+            <Field label="Domain"><MultiSelect value={form.domain} onChange={(v) => setForm({ ...form, domain: v })} options={DOMAINS} placeholder="Select one or more domains" /></Field>
             <div className="sm:col-span-2"><Field label="Member type"><MemberTypeChips value={form.member_types} onChange={(types) => setForm({ ...form, member_types: types, role: types.length ? typesToRole(types) : form.role })} /></Field></div>
             <Field label="Permission level"><select className="input" value={form.role} onChange={set('role')} disabled={isSelf}>{ROLES.map((r) => <option key={r.v} value={r.v}>{r.label}</option>)}</select>{isSelf && <span className="mt-1 block text-[11px] text-faint">You can't change your own access.</span>}</Field>
             <div className="sm:col-span-2"><Field label="About"><textarea className="input min-h-[70px] resize-y" maxLength={160} value={form.bio} onChange={set('bio')} /></Field></div>

@@ -16,7 +16,8 @@ DBROOT="$REPO/db"
 
 ORDER="profiles readonly posts votes tags comments feed admin teamboard calendar directory \
 onboarding notifications pipeline notifications_admin polls problemhub problem_upvotes \
-problem_votes_v2 invites registration_requests member_type autopsies security_hardening login_only input_limits"
+problem_votes_v2 invites registration_requests member_type autopsies security_hardening login_only input_limits \
+multiselect_profile"
 
 psql_db()  { docker compose -f "$COMPOSE" exec -T db psql -U postgres -d postgres "$@"; }
 apply_one() { psql_db -q -v ON_ERROR_STOP=0 -f - < "$DBROOT/$1.sql" 2>&1; }

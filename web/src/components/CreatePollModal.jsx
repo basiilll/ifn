@@ -12,12 +12,13 @@ export default function CreatePollModal({ open, onClose, onCreated }) {
   const [question, setQuestion] = useState('')
   const [body, setBody] = useState('')
   const [options, setOptions] = useState(['', ''])
+  const [allowMultiple, setAllowMultiple] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!open) return
-    setQuestion(''); setBody(''); setOptions(['', '']); setError('')
+    setQuestion(''); setBody(''); setOptions(['', '']); setAllowMultiple(false); setError('')
   }, [open])
 
   if (!open) return null
@@ -38,6 +39,7 @@ export default function CreatePollModal({ open, onClose, onCreated }) {
       p_body: body.trim() || null,
       p_options: opts,
       p_tags: [],
+      p_allow_multiple: allowMultiple,
     })
     setBusy(false)
     if (e2) { console.error(e2); return setError(errMessage(e2, 'Could not create the poll. Try again.')) }
@@ -48,7 +50,7 @@ export default function CreatePollModal({ open, onClose, onCreated }) {
     <ModalShell onRequestClose={() => !busy && onClose()} labelledBy="create-poll-title">
       <form onSubmit={submit}>
         <h2 id="create-poll-title" className="text-lg font-bold">Create poll</h2>
-        <p className="mt-0.5 text-xs text-muted">Admin only. Members get one vote each; results show after they vote.</p>
+        <p className="mt-0.5 text-xs text-muted">Admin only. Results show after members vote.</p>
 
         {error && <div role="alert" className="mt-4 rounded-lg border border-down/30 bg-down/10 px-3 py-2 text-sm text-down">{error}</div>}
 
@@ -76,7 +78,17 @@ export default function CreatePollModal({ open, onClose, onCreated }) {
           </div>
         </div>
 
-        <div className="mt-5 flex justify-end gap-2">
+        <label className="mt-4 flex items-center gap-2 text-sm text-ink">
+          <input
+            type="checkbox"
+            checked={allowMultiple}
+            onChange={(e) => setAllowMultiple(e.target.checked)}
+            className="h-4 w-4 rounded accent-accent"
+          />
+          Allow members to select multiple options
+        </label>
+
+        <div className="mt-4 flex justify-end gap-2">
           <button type="button" className="btn-ghost" onClick={onClose} disabled={busy}>Cancel</button>
           <button type="submit" className="btn-primary" disabled={busy}>{busy ? 'Creating...' : 'Create poll'}</button>
         </div>

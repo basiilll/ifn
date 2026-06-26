@@ -11,6 +11,9 @@ import { useAuth } from '../lib/AuthProvider'
 
 const GENERIC_ERR = 'Something went wrong. Please try again.'
 
+// Coerce text or text[] from the DB into a plain array (pre-migration rows return text).
+const toArr = (v) => Array.isArray(v) ? v : v ? [v] : []
+
 // dropdown that takes a list of plain string options plus an "all" entry
 function FilterDropdown({ label, value, options, onChange }) {
   const current = value || label
@@ -140,11 +143,11 @@ export default function Directory() {
 
               {m.bio && <p className="mt-2 line-clamp-3 break-words text-sm text-muted">{m.bio}</p>}
 
-              {(m.region || m.sector || m.domain) && (
+              {(m.region?.length || m.sector?.length || m.domain?.length) > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {m.region && <span className="chip">{m.region}</span>}
-                  {m.sector && <span className="chip">{m.sector}</span>}
-                  {m.domain && <span className="chip">{m.domain}</span>}
+                  {toArr(m.region).map((r) => <span key={r} className="chip">{r}</span>)}
+                  {toArr(m.sector).map((s) => <span key={s} className="chip">{s}</span>)}
+                  {toArr(m.domain).map((d) => <span key={d} className="chip">{d}</span>)}
                 </div>
               )}
 

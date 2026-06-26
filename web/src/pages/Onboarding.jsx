@@ -5,7 +5,7 @@ import { useAuth } from '../lib/AuthProvider'
 import { linkedinHandle } from '../lib/linkedin'
 import { REGIONS, SECTORS, DOMAINS } from '../lib/options'
 import Logo from '../components/Logo'
-import Combobox from '../components/Combobox'
+import MultiSelect from '../components/MultiSelect'
 
 export default function Onboarding() {
   const navigate = useNavigate()
@@ -19,7 +19,7 @@ export default function Onboarding() {
     : '/'
 
   const [form, setForm] = useState({
-    name: '', startup: '', region: '', sector: '', domain: '',
+    name: '', startup: '', region: [], sector: [], domain: [],
     phone: '', linkedin: '', bio: '', incubation_interest: false,
   })
   const [saving, setSaving] = useState(false)
@@ -56,9 +56,9 @@ export default function Onboarding() {
     const linkedin = linkedinHandle(form.linkedin)
     if (!name) return fail('Your name is required.', 'name')
     if (name.length > 80) return fail('Name must be 80 characters or fewer.', 'name')
-    if (!form.region) return fail('Pick your region.', 'region')
-    if (!form.sector) return fail('Pick your sector.', 'sector')
-    if (!form.domain) return fail('Pick your domain.', 'domain')
+    if (!form.region.length) return fail('Pick at least one region.', 'region')
+    if (!form.sector.length) return fail('Pick at least one sector.', 'sector')
+    if (!form.domain.length) return fail('Pick at least one domain.', 'domain')
     if (phone && !/^[+\d][\d\s().-]{5,19}$/.test(phone)) return fail('Enter a valid phone number.', 'phone')
     if (form.linkedin.trim() && !linkedin) return fail('Enter a valid LinkedIn URL or handle (the part after /in/).', 'linkedin')
 
@@ -99,20 +99,20 @@ export default function Onboarding() {
             <Field label="Email (locked)">
               <input className="input bg-page text-faint" value={email || ''} disabled />
             </Field>
-            <Field label="Region" required>
-              <Combobox
+            <Field label="Region" required hint="Select all states where you operate.">
+              <MultiSelect
                 id="region"
                 value={form.region}
                 onChange={(v) => setForm((f) => ({ ...f, region: v }))}
                 options={REGIONS}
-                placeholder="Select or type a state"
+                placeholder="Select one or more states"
               />
             </Field>
-            <Field label="Sector" required>
-              <Combobox id="sector" value={form.sector} onChange={(v) => setForm((f) => ({ ...f, sector: v }))} options={SECTORS} placeholder="Search or type a sector" />
+            <Field label="Sector" required hint="Select all that apply.">
+              <MultiSelect id="sector" value={form.sector} onChange={(v) => setForm((f) => ({ ...f, sector: v }))} options={SECTORS} placeholder="Select one or more sectors" />
             </Field>
-            <Field label="Domain" required>
-              <Combobox id="domain" value={form.domain} onChange={(v) => setForm((f) => ({ ...f, domain: v }))} options={DOMAINS} placeholder="Search or type a domain" />
+            <Field label="Domain" required hint="Select all that apply.">
+              <MultiSelect id="domain" value={form.domain} onChange={(v) => setForm((f) => ({ ...f, domain: v }))} options={DOMAINS} placeholder="Select one or more domains" />
             </Field>
             <Field label="Startup (optional)">
               <input className="input" maxLength={80} value={form.startup} onChange={set('startup')} placeholder="Your startup name" />
@@ -150,7 +150,7 @@ export default function Onboarding() {
   )
 }
 
-function Field({ label, required, children }) {
+function Field({ label, required, hint, children }) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-medium text-muted">
@@ -159,6 +159,7 @@ function Field({ label, required, children }) {
         {required && <span className="sr-only"> (required)</span>}
       </span>
       {children}
+      {hint && <p className="mt-1 text-xs text-faint">{hint}</p>}
     </label>
   )
 }

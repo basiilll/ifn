@@ -7,7 +7,7 @@ import { errMessage } from '../lib/errors'
 import { linkedinHandle, linkedinUrl } from '../lib/linkedin'
 import MemberTypeBadge from '../components/MemberTypeBadge'
 import ProfileSkeleton from '../components/ProfileSkeleton'
-import Combobox from '../components/Combobox'
+import MultiSelect from '../components/MultiSelect'
 
 export default function Profile() {
   usePageTitle('Profile')
@@ -52,9 +52,9 @@ export default function Profile() {
       phone: profile.phone || '',
       bio: profile.bio || '',
       startup: profile.startup || '',
-      region: profile.region || '',
-      sector: profile.sector || '',
-      domain: profile.domain || '',
+      region: profile.region || [],
+      sector: profile.sector || [],
+      domain: profile.domain || [],
       linkedin: profile.linkedin || '',
       incubation_interest: !!profile.incubation_interest,
     })
@@ -85,9 +85,9 @@ export default function Profile() {
         bio: bio || null,
         startup: startup || null,
         linkedin: linkedin || null,
-        region: form.region || null,
-        sector: form.sector || null,
-        domain: form.domain || null,
+        region: form.region?.length ? form.region : null,
+        sector: form.sector?.length ? form.sector : null,
+        domain: form.domain?.length ? form.domain : null,
         incubation_interest: form.incubation_interest,
       }
       // RLS allows updating own row; the role column update is revoked, so it cannot change here.
@@ -157,9 +157,9 @@ export default function Profile() {
                   <Field label="Full name" value={profile.name} />
                   <Field label="Email (locked)" value={email} />
                   <Field label="Phone" value={profile.phone} />
-                  <Field label="Region" value={profile.region} />
-                  <Field label="Sector" value={profile.sector} />
-                  <Field label="Domain" value={profile.domain} />
+                  <Field label="Region" value={[].concat(profile.region || []).join(', ')} />
+                  <Field label="Sector" value={[].concat(profile.sector || []).join(', ')} />
+                  <Field label="Domain" value={[].concat(profile.domain || []).join(', ')} />
                   <Field label="Startup" value={profile.startup} />
                   <Field label="Incubation interest" value={profile.incubation_interest ? 'Yes' : 'No'} />
                   <div className="sm:col-span-2"><Field label="About" value={profile.bio} /></div>
@@ -179,18 +179,18 @@ export default function Profile() {
                     <input className="input" maxLength={80} value={form.startup} onChange={(e) => setForm({ ...form, startup: e.target.value })} />
                   </Edit>
                   <Edit label="Region">
-                    <Combobox
+                    <MultiSelect
                       value={form.region}
                       onChange={(v) => setForm({ ...form, region: v })}
                       options={REGIONS}
-                      placeholder="Select or type a state"
+                      placeholder="Select one or more states"
                     />
                   </Edit>
                   <Edit label="Sector">
-                    <Combobox value={form.sector} onChange={(v) => setForm({ ...form, sector: v })} options={SECTORS} placeholder="Search or type a sector" />
+                    <MultiSelect value={form.sector} onChange={(v) => setForm({ ...form, sector: v })} options={SECTORS} placeholder="Select one or more sectors" />
                   </Edit>
                   <Edit label="Domain">
-                    <Combobox value={form.domain} onChange={(v) => setForm({ ...form, domain: v })} options={DOMAINS} placeholder="Search or type a domain" />
+                    <MultiSelect value={form.domain} onChange={(v) => setForm({ ...form, domain: v })} options={DOMAINS} placeholder="Select one or more domains" />
                   </Edit>
                   <Edit label="LinkedIn" hint="Paste your LinkedIn URL or just your handle (the part after /in/). We always link to linkedin.com.">
                     <input className="input" maxLength={200} value={form.linkedin} placeholder="your-handle or full linkedin.com/in/ URL"
