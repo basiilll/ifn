@@ -15,36 +15,10 @@ alter table public.profiles add column if not exists contactable boolean not nul
 alter table public.profiles add column if not exists directory_pinned boolean not null default false;
 revoke update (directory_pinned) on public.profiles from authenticated;
 
-drop function if exists public.directory(text, text, text, text, text);
-create function public.directory(
-  p_search text default null,
-  p_region text default null,
-  p_sector text default null,
-  p_domain text default null,
-  p_role text default null
-)
-returns table (
-  id uuid, name text, role text, startup text,
-  region text, sector text, domain text, linkedin text, bio text, pinned boolean, contactable boolean
-)
-language sql stable security definer set search_path = public
-as $$
-  select
-    p.id, p.name, p.role, p.startup, p.region, p.sector, p.domain, p.linkedin,
-    p.bio, coalesce(p.directory_pinned, false), coalesce(p.contactable, true)
-  from public.profiles p
-  where coalesce(p.banned, false) = false
-    and coalesce(p.directory_visible, true) = true
-    and (p_role is null or p.role = p_role)
-    and (p_region is null or p.region = p_region)
-    and (p_sector is null or p.sector = p_sector)
-    and (p_domain is null or p.domain = p_domain)
-    and (p_search is null or p_search = ''
-         or p.name ilike '%' || p_search || '%'
-         or coalesce(p.startup, '') ilike '%' || p_search || '%')
-  order by coalesce(p.directory_pinned, false) desc, p.name
-$$;
-grant execute on function public.directory(text, text, text, text, text) to authenticated;
+-- directory() lives in db/multiselect_profile.sql now (array-aware 6-arg form, defined after
+-- region/sector/domain become text[]). member_type.sql later added the p_member_type arg and
+-- multiselect_profile.sql made the filters array-aware, so this older 5-arg scalar version is
+-- fully superseded — defining it here only fails on a migrated DB (text[] = text).
 
 -- admin pins/unpins a profile (network-wide top placement in the directory).
 create or replace function public.admin_set_directory_pinned(p_user uuid, p_pinned boolean)
@@ -112,22 +86,6 @@ $$;
 grant execute on function public.contact_member(uuid, text) to authenticated;
 
 
--- A member's public profile (for the /u/:id page). profiles RLS is read-own, so this
--- definer RPC exposes the same public fields as the directory: never phone or email.
--- Banned members return no row (treated as not found). Works even if the member opted out
--- of the directory listing, since their name is already on any non-anonymous post they made.
-create or replace function public.public_profile(p_user uuid)
-returns table (
-  id uuid, name text, role text, startup text, region text, sector text, domain text,
-  linkedin text, bio text, contactable boolean, directory_visible boolean,
-  incubation_interest boolean, is_self boolean, created_at timestamptz
-)
-language sql stable security definer set search_path = public
-as $$
-  select p.id, p.name, p.role, p.startup, p.region, p.sector, p.domain,
-         p.linkedin, p.bio, coalesce(p.contactable, true), coalesce(p.directory_visible, true),
-         coalesce(p.incubation_interest, false), (p.id = auth.uid()), p.created_at
-  from public.profiles p
-  where p.id = p_user and coalesce(p.banned, false) = false
-$$;
-grant execute on function public.public_profile(uuid) to authenticated;
+-- public_profile() (the /u/:id page RPC) lives in db/multiselect_profile.sql now — it returns
+-- region/sector/domain as text[] and adds member_types + email. The older scalar version that
+-- was here is superseded; defining it here only fails on a migrated DB.

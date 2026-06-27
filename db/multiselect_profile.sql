@@ -45,6 +45,9 @@ alter table public.profiles add  constraint chk_profiles_domain_arr
   check (domain is null or (coalesce(array_length(domain, 1), 0) <= 50 and char_length(array_to_string(domain, ',')) <= 1000));
 
 -- directory(): return text[] for region/sector/domain; filter = "has this value" (&&).
+-- Drop both the legacy 5-arg form (old directory.sql) and the scalar 6-arg form (old
+-- member_type.sql); this file is now the sole definer.
+drop function if exists public.directory(text, text, text, text, text);
 drop function if exists public.directory(text, text, text, text, text, text);
 create function public.directory(
   p_search      text default null,

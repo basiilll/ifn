@@ -6,7 +6,10 @@ alter table public.profiles add column if not exists onboarded boolean not null 
 
 -- Safe backfill: existing members who already have profile data are past onboarding.
 -- Idempotent (only touches rows with data), so re-running never re-prompts a fresh signup.
+-- region/sector/domain use `is not null` (not `<> ''`) so this stays valid after
+-- db/multiselect_profile.sql migrates them to text[] — `text[] <> ''` errors. handle_new_user
+-- leaves them null and writes use nullif(...,''), so null is the only "empty" they ever hold.
 update public.profiles set onboarded = true
 where onboarded = false
-  and (coalesce(region, '') <> '' or coalesce(sector, '') <> '' or coalesce(domain, '') <> ''
+  and (region is not null or sector is not null or domain is not null
        or coalesce(bio, '') <> '' or coalesce(startup, '') <> '' or coalesce(phone, '') <> '');
