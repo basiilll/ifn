@@ -715,28 +715,11 @@ grant execute on function public.idea_dossier(uuid) to authenticated;
 -- ---------------------------------------------------------------------------
 -- Mentor RPCs
 
--- Pull-queue: unassigned G1 applications, filterable by the idea's sector; the mentor's own
--- sector floats first, oldest first (fairness).
-drop function if exists public.mentor_queue();
-drop function if exists public.mentor_queue(text);
-create function public.mentor_queue(p_sector text default null)
-returns table (
-  id uuid, ifn int, title text, sector text, sectors text[], problem text, target_user text,
-  author_name text, created_at timestamptz
-)
-language sql stable security definer set search_path = public
-as $$
-  select i.id, i.ifn, i.title, i.sector, i.sectors, i.problem, i.application->>'target_user',
-         a.name, i.created_at
-  from public.pipeline_ideas i
-  join public.profiles a on a.id = i.author_id
-  where public.is_mentor_or_admin()
-    and i.pipeline_state = 'active' and i.gate = 1 and i.mentor_id is null
-    and (p_sector is null or p_sector = any(i.sectors))
-  order by ((select sector from public.profiles where id = auth.uid()) = any(i.sectors)) desc,
-           i.created_at asc
-$$;
-grant execute on function public.mentor_queue(text) to authenticated;
+-- Pull-queue mentor_queue() lives in db/multiselect_profile.sql, NOT here: it reads the
+-- mentor's own profiles.sector to float matching ideas first, and that column is text[] only
+-- after multiselect_profile.sql migrates it. This file runs before that migration, so the
+-- column type here is indeterminate — defining mentor_queue here breaks on a migrated DB
+-- (text[] = text). See db/multiselect_profile.sql.
 
 -- Self-pick from the queue: claim + accept in one step (G1 -> G3, dossier requested).
 create or replace function public.mentor_pick(p_idea uuid)

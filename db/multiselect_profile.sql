@@ -164,3 +164,29 @@ begin
 end
 $$;
 grant execute on function public.admin_update_profile(uuid, text, text, text, text, text[], text[], text[], text, boolean, text[]) to authenticated;
+
+-- mentor_queue(): pull-queue of unassigned G1 applications, filterable by sector; ideas that
+-- overlap the mentor's own sectors float first, oldest first (fairness). Relocated here from
+-- pipeline.sql because the mentor's profiles.sector is text[] after the migration above, so the
+-- own-sector match uses array overlap (&&) instead of the old scalar `= any(...)`.
+-- (p_sector stays a single text filter: `p_sector = any(i.sectors)` is text = element, fine.)
+drop function if exists public.mentor_queue();
+drop function if exists public.mentor_queue(text);
+create function public.mentor_queue(p_sector text default null)
+returns table (
+  id uuid, ifn int, title text, sector text, sectors text[], problem text, target_user text,
+  author_name text, created_at timestamptz
+)
+language sql stable security definer set search_path = public
+as $$
+  select i.id, i.ifn, i.title, i.sector, i.sectors, i.problem, i.application->>'target_user',
+         a.name, i.created_at
+  from public.pipeline_ideas i
+  join public.profiles a on a.id = i.author_id
+  where public.is_mentor_or_admin()
+    and i.pipeline_state = 'active' and i.gate = 1 and i.mentor_id is null
+    and (p_sector is null or p_sector = any(i.sectors))
+  order by coalesce((select sector from public.profiles where id = auth.uid()) && i.sectors, false) desc,
+           i.created_at asc
+$$;
+grant execute on function public.mentor_queue(text) to authenticated;
