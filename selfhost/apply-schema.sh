@@ -42,4 +42,10 @@ for f in $ORDER; do
   if [ -n "$errs" ]; then echo "✗ $f.sql"; echo "$errs" | sed 's/^/    /'; fail=1
   else echo "✓ $f.sql"; fi
 done
+
+# Tell PostgREST to reload its schema cache — without this, a freshly created/changed RPC
+# stays invisible (PGRST202 "could not find the function … in the schema cache") until the
+# rest container restarts.
+psql_db -q -c "notify pgrst, 'reload schema';" >/dev/null 2>&1 && echo "↻ PostgREST schema reload notified"
+
 exit $fail
