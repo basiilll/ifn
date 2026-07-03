@@ -60,7 +60,7 @@ create function public.directory(
 returns table (
   id uuid, name text, role text, member_types text[], startup text,
   region text[], sector text[], domain text[], linkedin text, bio text,
-  pinned boolean, contactable boolean, email text
+  pinned boolean, contactable boolean
 )
 language sql stable security definer set search_path = public
 as $$
@@ -68,10 +68,8 @@ as $$
     p.id, p.name, p.role, coalesce(p.member_types, '{}'), p.startup,
     coalesce(p.region, '{}'), coalesce(p.sector, '{}'), coalesce(p.domain, '{}'),
     p.linkedin, p.bio,
-    coalesce(p.directory_pinned, false), coalesce(p.contactable, true),
-    case when coalesce(p.contactable, true) then u.email::text else null end
+    coalesce(p.directory_pinned, false), coalesce(p.contactable, true)
   from public.profiles p
-  join auth.users u on u.id = p.id
   where coalesce(p.banned, false) = false
     and coalesce(p.onboarded, false) = true
     and coalesce(p.directory_visible, true) = true
@@ -95,7 +93,7 @@ returns table (
   id uuid, name text, role text, member_types text[], startup text,
   region text[], sector text[], domain text[],
   linkedin text, bio text, contactable boolean, directory_visible boolean,
-  incubation_interest boolean, is_self boolean, created_at timestamptz, email text
+  incubation_interest boolean, is_self boolean, created_at timestamptz
 )
 language sql stable security definer set search_path = public
 as $$
@@ -103,10 +101,8 @@ as $$
          coalesce(p.region, '{}'), coalesce(p.sector, '{}'), coalesce(p.domain, '{}'),
          p.linkedin, p.bio,
          coalesce(p.contactable, true), coalesce(p.directory_visible, true),
-         coalesce(p.incubation_interest, false), (p.id = auth.uid()), p.created_at,
-         case when coalesce(p.contactable, true) or p.id = auth.uid() then u.email::text else null end
+         coalesce(p.incubation_interest, false), (p.id = auth.uid()), p.created_at
   from public.profiles p
-  join auth.users u on u.id = p.id
   where p.id = p_user and coalesce(p.banned, false) = false
 $$;
 revoke execute on function public.public_profile(uuid) from anon, public;

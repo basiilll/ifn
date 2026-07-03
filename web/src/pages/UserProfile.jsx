@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Pencil } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { linkedinUrl } from '../lib/linkedin'
 import MemberTypeBadge from '../components/MemberTypeBadge'
@@ -91,14 +91,8 @@ export default function UserProfile() {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
-          {profile.is_self ? (
+          {profile.is_self && (
             <Link to="/profile" className="btn-outline inline-flex items-center gap-1.5 px-3 py-2 text-sm"><Pencil size={14} /> Edit profile</Link>
-          ) : (
-            profile.email && (
-              <a href={`mailto:${profile.email}`} className="btn-primary inline-flex items-center gap-1.5 px-3 py-2 text-sm">
-                <Mail size={14} /> Email
-              </a>
-            )
           )}
           {linkedinUrl(profile.linkedin) && (
             <a href={linkedinUrl(profile.linkedin)} target="_blank" rel="noopener noreferrer" className="btn-outline px-3 py-2 text-sm">LinkedIn</a>

@@ -152,9 +152,6 @@ export default function Directory() {
               )}
 
               <div className="mt-3 flex flex-wrap gap-2">
-                {m.id !== uid && m.email && (
-                  <a href={`mailto:${m.email}`} className="btn-outline px-3 py-1.5 text-xs">Email</a>
-                )}
                 {linkedinUrl(m.linkedin) && (
                   <a href={linkedinUrl(m.linkedin)} target="_blank" rel="noopener noreferrer" className="btn-outline px-3 py-1.5 text-xs">LinkedIn</a>
                 )}

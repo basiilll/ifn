@@ -45,7 +45,7 @@ export default function Settings() {
       .from('profiles')
       .select('name, role, member_types, directory_visible, contactable, notification_prefs')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         if (!active || !data) { if (active) setLoading(false); return }
         setProfile(data)

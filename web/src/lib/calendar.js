@@ -37,7 +37,7 @@ function endOf(ev) {
 }
 
 function icsEscape(s) {
-  return String(s || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/[,;]/g, (m) => '\\' + m)
+  return String(s || '').replace(/\\/g, '\\\\').replace(/\r\n?|\n/g, '\\n').replace(/[,;]/g, (m) => '\\' + m)
 }
 
 export function googleCalUrl(ev) {

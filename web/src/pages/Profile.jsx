@@ -36,7 +36,7 @@ export default function Profile() {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
       .then(({ data, error: e }) => {
         if (!active) return
         if (e) setError(errMessage(e, 'Could not load your profile. Refresh and try again.'))
