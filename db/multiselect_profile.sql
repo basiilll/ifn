@@ -124,7 +124,8 @@ as $$
   from public.profiles p
   where public.is_admin() and p.id = p_user
 $$;
-grant execute on function public.admin_get_profile(uuid) to authenticated;
+revoke execute on function public.admin_get_profile(uuid) from anon, public;
+grant  execute on function public.admin_get_profile(uuid) to authenticated;
 
 -- admin_update_profile(): accept text[] for region/sector/domain.
 drop function if exists public.admin_update_profile(uuid, text, text, text, text, text,  text,  text,  text, boolean, text[]);
@@ -162,7 +163,8 @@ begin
   where id = p_user;
 end
 $$;
-grant execute on function public.admin_update_profile(uuid, text, text, text, text, text[], text[], text[], text, boolean, text[]) to authenticated;
+revoke execute on function public.admin_update_profile(uuid, text, text, text, text, text[], text[], text[], text, boolean, text[]) from anon, public;
+grant  execute on function public.admin_update_profile(uuid, text, text, text, text, text[], text[], text[], text, boolean, text[]) to authenticated;
 
 -- mentor_queue(): pull-queue of unassigned G1 applications, filterable by sector; ideas that
 -- overlap the mentor's own sectors float first, oldest first (fairness). Relocated here from
@@ -188,4 +190,5 @@ as $$
   order by coalesce((select sector from public.profiles where id = auth.uid()) && i.sectors, false) desc,
            i.created_at asc
 $$;
-grant execute on function public.mentor_queue(text) to authenticated;
+revoke execute on function public.mentor_queue(text) from anon, public;
+grant  execute on function public.mentor_queue(text) to authenticated;
