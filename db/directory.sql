@@ -66,6 +66,10 @@ declare
 begin
   if v_uid is null then raise exception 'not authenticated'; end if;
   perform public.write_guard();
+  -- Serialize a sender's concurrent attempts so the count-then-insert daily cap below is
+  -- atomic. Without this, parallel requests all read v_sent < cap and each insert, blowing
+  -- past contact_daily_cap() (relay spam / outbound-mail cost abuse). Released at commit.
+  perform pg_advisory_xact_lock(hashtext('contact_member:' || v_uid::text));
   if p_to = v_uid then raise exception 'you cannot message yourself'; end if;
   if not exists (
     select 1 from public.profiles

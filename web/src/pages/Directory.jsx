@@ -6,6 +6,7 @@ import { linkedinUrl } from '../lib/linkedin'
 import { REGIONS, SECTORS, DOMAINS, MEMBER_TYPES } from '../lib/options'
 import MemberTypeBadge from '../components/MemberTypeBadge'
 import AuthorLink from '../components/AuthorLink'
+import ContactModal from '../components/ContactModal'
 import Dropdown, { MenuItem } from '../components/Dropdown'
 import { useAuth } from '../lib/AuthProvider'
 
@@ -44,6 +45,7 @@ export default function Directory() {
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [contactTarget, setContactTarget] = useState(null)
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(q.trim()), 300)
@@ -62,6 +64,9 @@ export default function Directory() {
     if (e) { console.error(e); setError('Could not load the directory. Check your connection and retry.') } else { setError(''); setMembers(data || []) }
     setLoading(false)
   }, [debounced, region, sector, domain, memberType])
+  // Refetch when the debounced query or a filter changes. Legitimate external-data sync;
+  // the loading flag is set synchronously on purpose so the spinner shows at once.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
   async function togglePin(m) {
@@ -155,6 +160,9 @@ export default function Directory() {
                 {linkedinUrl(m.linkedin) && (
                   <a href={linkedinUrl(m.linkedin)} target="_blank" rel="noopener noreferrer" className="btn-outline px-3 py-1.5 text-xs">LinkedIn</a>
                 )}
+                {m.id !== uid && m.contactable && (
+                  <button className="btn-outline px-3 py-1.5 text-xs" onClick={() => setContactTarget(m)}>Contact</button>
+                )}
                 {m.id === uid && <span className="px-1 py-1.5 text-xs text-muted">This is you</span>}
               </div>
             </li>
@@ -163,6 +171,9 @@ export default function Directory() {
       )}
       </div>
 
+      {contactTarget && (
+        <ContactModal member={contactTarget} onClose={() => setContactTarget(null)} />
+      )}
     </div>
   )
 }
