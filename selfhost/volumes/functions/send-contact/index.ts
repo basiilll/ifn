@@ -5,20 +5,21 @@
 //   2. contact_member() RPC (as the caller) enforces not-banned + reachable + not-self + the
 //      daily cap and writes the audit row. It raises a client-surfaceable message on any block.
 //   3. Resolve the recipient's real email with the service role (never returned to the client).
-//   4. Send over the SAME SMTP that GoTrue uses for auth mail (Resend's SMTP relay in prod,
-//      Mailpit in staging), reusing the existing SMTP_* env. reply_to is the sender's address
-//      so the recipient can reply directly; this reveals the initiator's email to the recipient
-//      by design (they chose to reach out). The recipient's address is never shown to the sender.
+//   4. Send through Resend's HTTP API with plain fetch. NO runtime module import: importing an
+//      SMTP/email lib at boot hangs this edge runtime (same reason create-member is import-free).
+//      reply_to is the sender's address so the recipient can reply directly; this reveals the
+//      initiator's email to the recipient by design. The recipient's address is never shown to
+//      the sender.
 //
-// Env (all already used by the GoTrue mailer): SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS,
-//   SMTP_ADMIN_EMAIL (From address), SMTP_SENDER_NAME (From name). Plus the platform-injected
-//   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY.
+// Env: reuses the GoTrue mailer's Resend credential. With Resend's SMTP relay the SMTP password
+//   IS the Resend API key, so SMTP_PASS is used as the bearer token. From = SMTP_SENDER_NAME
+//   <SMTP_ADMIN_EMAIL> (must be a Resend-verified domain). Plus platform-injected SUPABASE_URL,
+//   SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY.
 //
 // Deploy: copy into selfhost/volumes/functions/ and recreate the functions container, or
 //         `supabase functions deploy send-contact`.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 const CORS = {
   'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
@@ -46,14 +47,11 @@ Deno.serve(async (req) => {
   const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
   const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-  // Same SMTP the GoTrue mailer uses. In prod this is Resend's SMTP relay (key in SMTP_PASS).
-  const SMTP_HOST = Deno.env.get('SMTP_HOST')
-  const SMTP_PORT = Number(Deno.env.get('SMTP_PORT') ?? '587')
-  const SMTP_USER = Deno.env.get('SMTP_USER') ?? ''
-  const SMTP_PASS = Deno.env.get('SMTP_PASS') ?? ''
-  const FROM_EMAIL = Deno.env.get('SMTP_ADMIN_EMAIL') ?? 'no-reply@ifn.local'
+  // Reuse the Resend credential the GoTrue mailer already uses (Resend SMTP password = API key).
+  const RESEND_KEY = Deno.env.get('SMTP_PASS') ?? ''
+  const FROM_EMAIL = Deno.env.get('SMTP_ADMIN_EMAIL') ?? 'no-reply@icfaifoundersnetwork.app'
   const FROM_NAME = Deno.env.get('SMTP_SENDER_NAME') ?? 'ICFAI Founders Network'
-  if (!SMTP_HOST) return json({ error: 'Contact relay is not configured.' }, 500)
+  if (!RESEND_KEY) return json({ error: 'Contact relay is not configured.' }, 500)
 
   let to: unknown, subject: unknown, message: unknown
   try {
@@ -83,8 +81,9 @@ Deno.serve(async (req) => {
   const senderName = meRow?.name?.trim() || 'A network member'
 
   // 2. Enforce policy + rate limit + audit, as the caller. Raises on any block.
-  //    ponytail: the audit row and daily cap are consumed here, before the send. If SMTP later
-  //    fails the attempt still counts. Acceptable; a compensating delete would need a second RPC.
+  //    ponytail: the audit row and daily cap are consumed here, before the send. If the send
+  //    later fails the attempt still counts. Acceptable; a compensating delete would need a
+  //    second RPC.
   const { error: gateErr } = await caller.rpc('contact_member', { p_to: to, p_subject: subj || null })
   if (gateErr) {
     const m = gateErr.message || 'Could not send the message.'
@@ -107,33 +106,27 @@ Deno.serve(async (req) => {
     return json({ error: 'Could not deliver the message.' }, 502)
   }
 
-  // 4. Send over SMTP (same relay as auth mail).
+  // 4. Send via Resend's HTTP API (plain fetch, no imports).
   const text =
     `${senderName} sent you a message through the ICFAI Founders Network directory.\n\n` +
     (subj ? `Subject: ${subj}\n\n` : '') +
     `${msg}\n\n` +
     `Reply to this email to respond to ${senderName} directly.`
-  const client = new SMTPClient({
-    connection: {
-      hostname: SMTP_HOST,
-      port: SMTP_PORT,
-      tls: SMTP_PORT === 465,
-      auth: SMTP_USER ? { username: SMTP_USER, password: SMTP_PASS } : undefined,
-    },
-  })
-  try {
-    await client.send({
+  const resp = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: recipientEmail,
-      replyTo: senderEmail || undefined,
+      reply_to: senderEmail || undefined,
       subject: subj ? `[IFN] ${subj}` : `[IFN] ${senderName} sent you a message`,
-      content: text,
-    })
-  } catch (err) {
-    console.error('smtp send failed:', err)
+      text,
+    }),
+  })
+  if (!resp.ok) {
+    const detail = await resp.text().catch(() => '')
+    console.error('resend send failed:', resp.status, detail)
     return json({ error: 'Could not send the message. Please try again later.' }, 502)
-  } finally {
-    try { await client.close() } catch { /* ignore */ }
   }
 
   return json({ ok: true })
