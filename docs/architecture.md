@@ -46,7 +46,7 @@ node "Windows box\nDocker Desktop on WSL2" as host {
     database "Postgres 15+\n(RLS)" as pg
   }
 }
-cloud "Resend SMTP\n(password reset mail)" as smtp
+cloud "Resend\n(auth mail + directory relay)" as smtp
 
 user --> iis : HTTPS, app + api
 iis --> kong : reverse proxy -> 127.0.0.1:8010

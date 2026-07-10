@@ -23,7 +23,7 @@ Trigger a reset from the app, then open http://localhost:8035 to read it. Done.
 
 ## Production: point GoTrue at Resend
 
-[Resend](https://resend.com) is a transactional email service with a free tier (**100 emails a day, 3,000 a month** — plenty for password resets). Any SMTP provider works, Resend is just the worked example. If you would rather use a Gmail / Google Workspace account, skip to [Alternative: Gmail / Google Workspace SMTP](#alternative-gmail--google-workspace-smtp) below.
+[Resend](https://resend.com) is a transactional email service with a free tier (**100 emails a day, 3,000 a month**). That quota is shared by GoTrue auth mail (password resets) and the Directory contact relay (`send-contact`), so watch usage as the network grows and upgrade the plan before you hit the cap; once it is reached, both stop sending. Any SMTP provider works, Resend is just the worked example. If you would rather use a Gmail / Google Workspace account, skip to [Alternative: Gmail / Google Workspace SMTP](#alternative-gmail--google-workspace-smtp) below.
 
 ### Step 1: make a Resend account and verify a domain
 
@@ -53,6 +53,7 @@ SMTP_SENDER_NAME=ICFAI Founders Network
 Notes:
 - Port `465` is SSL. If `465` is blocked on your network, use `587` instead.
 - `SMTP_ADMIN_EMAIL` is the "from" address. It MUST be at the domain you verified in step 1, or Resend rejects it.
+- The Directory contact relay (`send-contact`) reuses these same values: `SMTP_PASS` as its Resend API key and `SMTP_ADMIN_EMAIL` / `SMTP_SENDER_NAME` as the from. No separate key to set.
 
 ### Step 4: restart the auth server
 
