@@ -5,13 +5,13 @@ import Topbar from './Topbar'
 import SideNav from './SideNav'
 import RightSidebar from './RightSidebar'
 import { useAuth } from '../lib/AuthProvider'
-import { useIdleLogout } from '../lib/useIdleLogout'
+import { useSessionExpiry } from '../lib/useSessionExpiry'
 
 // Authed app shell: sticky topbar + left rail (desktop) / drawer (mobile) + page Outlet.
 export default function Layout() {
   const [navOpen, setNavOpen] = useState(false)
-  const { restricted } = useAuth()
-  useIdleLogout() // NIC item 20: sign out after 20 min of inactivity (authed shell only)
+  const { restricted, session } = useAuth()
+  useSessionExpiry(session?.expires_at) // NIC item 20: hard 20-min session, then re-login
   const { pathname } = useLocation()
   const showRight = pathname === '/' // right rail only on the Feed
 

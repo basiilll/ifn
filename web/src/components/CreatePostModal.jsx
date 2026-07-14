@@ -3,14 +3,20 @@ import { X, FileText, ArrowLeft } from 'lucide-react'
 import ModalShell from './ModalShell'
 import ConfirmModal from './ConfirmModal'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/AuthProvider'
 import { timeAgo } from '../lib/format'
 import { errMessage } from '../lib/errors'
+import { useDraft, readDraft, clearDraft } from '../lib/useDraft'
 
 const MAX_TAGS = 10
 
 // One generic post: title + body + tags. (Kinds/ideas/problems were retired from the feed.)
 export default function CreatePostModal({ open, onClose, onCreated, onUpdated, editPost }) {
   const isEdit = !!editPost
+  const { session } = useAuth()
+  // Only the new-post buffer is autosaved. Editing a published post or a loaded server draft
+  // already has a row to save into, so localStorage would just fight with it.
+  const draftKey = `ifn-post-draft-${session?.user?.id || 'anon'}`
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [anonymous, setAnonymous] = useState(false)
@@ -44,21 +50,32 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
     if (!open) return
     setDraft(null)
     setView('form')
+    // Restore whatever they were typing when the session died (or the tab closed).
+    const saved = editPost ? null : readDraft(draftKey)
     if (editPost) {
       setTitle(editPost.title || '')
       setBody(editPost.problem || '')
       setTags(editPost.tags || [])
     } else {
-      setTitle(''); setBody(''); setAnonymous(false); setTags([])
+      setTitle(saved?.title || '')
+      setBody(saved?.body || '')
+      setAnonymous(saved?.anonymous || false)
+      setTags(saved?.tags || [])
       fetchDrafts()
     }
     setTagInput(''); setError('')
+    // Snapshot the restored values, not empty ones: reopening and closing an untouched restored
+    // draft should not prompt to discard. The buffer stays in localStorage until it is saved.
     initialRef.current = formSnap({
-      title: editPost?.title || '',
-      body: editPost?.problem || '',
-      tags: editPost?.tags || [],
+      title: editPost?.title || saved?.title || '',
+      body: editPost?.problem || saved?.body || '',
+      tags: editPost?.tags || saved?.tags || [],
     })
-  }, [open, editPost])
+  }, [open, editPost, draftKey])
+
+  // Must run before the early return below — hooks cannot be conditional. Skipping while closed
+  // also stops a just-published post being written straight back as a fresh draft.
+  useDraft(draftKey, { title, body, tags, anonymous }, { skip: !open || isEdit || !!draft })
 
   if (!open) return null
 
@@ -152,6 +169,7 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
           p_tags: tags,
         })
         if (rpcErr) { console.error(rpcErr); setError(errMessage(rpcErr, 'Could not save your post. Check your connection and try again.')); return }
+        clearDraft(draftKey) // it is a real row now (draft or published); drop the local buffer
         onCreated?.(status)
       }
     } catch {
@@ -287,7 +305,7 @@ export default function CreatePostModal({ open, onClose, onCreated, onUpdated, e
         message="Your unsaved text will be lost."
         confirmLabel="Discard"
         tone="danger"
-        onConfirm={() => { setConfirmDiscard(false); onClose() }}
+        onConfirm={() => { clearDraft(draftKey); setConfirmDiscard(false); onClose() }}
         onClose={() => setConfirmDiscard(false)}
       />
     )}

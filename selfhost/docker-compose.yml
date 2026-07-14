@@ -157,6 +157,16 @@ services:
       GOTRUE_PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-8}
       GOTRUE_PASSWORD_REQUIRED_CHARACTERS: ${PASSWORD_REQUIRED_CHARACTERS:-abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789:!@#%^&*()_+-=?}
 
+      # Server-side session lifetime (audit Case II). The access token already expires on its own
+      # (GOTRUE_JWT_EXP), but without these the refresh token mints new ones forever, so a stolen
+      # session never dies. INACTIVITY_TIMEOUT kills a session that stops being refreshed;
+      # supabase-js stops auto-refreshing once the tab is hidden, so a closed/backgrounded client
+      # ages out. TIMEBOX is the hard ceiling that an attacker cannot defeat by refreshing on a
+      # timer, which INACTIVITY_TIMEOUT alone does not stop. Neither one sees "tab open, user away"
+      # — that is what useIdleLogout on the client is for. Both controls are needed.
+      GOTRUE_SESSIONS_INACTIVITY_TIMEOUT: ${SESSIONS_INACTIVITY_TIMEOUT:-20m}
+      GOTRUE_SESSIONS_TIMEBOX: ${SESSIONS_TIMEBOX:-20m}
+
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
