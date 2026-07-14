@@ -97,6 +97,10 @@ services:
       KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
       KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
       KONG_PROXY_ACCESS_LOG: /dev/stdout combined
+      # Stop Kong advertising its exact version via `Via: 1.1 kong/<version>` (audit Case VII).
+      # `off` drops Server/Via and the X-Kong-*-Latency tokens at the source; Caddy strips them
+      # again on the way out, since Caddy adds a Via of its own that Kong config cannot reach.
+      KONG_HEADERS: "off"
       #KONG_SSL_CERT: /home/kong/server.crt
       #KONG_SSL_CERT_KEY: /home/kong/server.key
       SUPABASE_ANON_KEY: ${ANON_KEY}
@@ -151,7 +155,7 @@ services:
       # already asks for >=8, but the anon key can POST straight to GoTrue, so enforce here.
       # REQUIRED_CHARACTERS is colon-separated classes; a password must include one from each.
       GOTRUE_PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-8}
-      GOTRUE_PASSWORD_REQUIRED_CHARACTERS: ${PASSWORD_REQUIRED_CHARACTERS:-abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789}
+      GOTRUE_PASSWORD_REQUIRED_CHARACTERS: ${PASSWORD_REQUIRED_CHARACTERS:-abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789:!@#%^&*()_+-=?}
 
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../lib/AuthProvider'
 import { supabase } from '../lib/supabase'
 import { errMessage } from '../lib/errors'
+import { passwordError } from '../lib/password'
 import Logo from './Logo'
 import Spinner from './Spinner'
 
@@ -30,7 +31,8 @@ export default function PasswordChangeGate({ children }) {
   async function submit(e) {
     e.preventDefault()
     setError('')
-    if (pw.length < 8) return setError('Password must be at least 8 characters.')
+    const pwErr = passwordError(pw)
+    if (pwErr) return setError(pwErr)
     if (pw !== confirm) return setError('Passwords do not match.')
     setBusy(true)
     const { error: upErr } = await supabase.auth.updateUser({ password: pw })

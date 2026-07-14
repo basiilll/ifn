@@ -1,3 +1,5 @@
+import { PASSWORD_RULE } from './password'
+
 // Turn a Supabase/Postgres error into a user-facing message.
 //
 // A server-side `raise exception` (our business rules: read-only, banned, posting
@@ -28,6 +30,14 @@ export function errMessage(err, fallback = 'Something went wrong. Please try aga
   // temp-password user; name the temp password explicitly.
   if (err.code === 'same_password' || /different from the old password/i.test(raw)) {
     return 'Your new password must be different from your temporary password.'
+  }
+  // GoTrue's own weak-password rejection (AuthWeakPasswordError, status 422, code
+  // 'weak_password'). Its raw message lists the character classes verbatim ("...at least one
+  // character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFG..."), which is unreadable. This only
+  // fires when password.js has drifted from PASSWORD_REQUIRED_CHARACTERS on the server, so state
+  // the rule plainly rather than falling through to a bare "try again".
+  if (err.code === 'weak_password' || /at least one character of each/i.test(raw)) {
+    return PASSWORD_RULE
   }
   // Our own raise_exception business rules: show the message, capitalized.
   if (err.code === 'P0001' && raw) return raw.charAt(0).toUpperCase() + raw.slice(1)

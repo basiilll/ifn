@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
+import { passwordError } from '../lib/password'
 import Logo from '../components/Logo'
 
 export default function ResetPassword() {
@@ -18,7 +19,8 @@ export default function ResetPassword() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    if (password.length < 8) return setError('Password must be at least 8 characters.')
+    const pwErr = passwordError(password)
+    if (pwErr) return setError(pwErr)
     if (password !== confirm) return setError('Passwords do not match.')
 
     setBusy(true)

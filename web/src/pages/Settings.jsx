@@ -4,6 +4,7 @@ import { usePageTitle } from '../lib/usePageTitle'
 import { Check } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthProvider'
+import { passwordError } from '../lib/password'
 import MemberTypeBadge from '../components/MemberTypeBadge'
 import ConfirmModal from '../components/ConfirmModal'
 import { errMessage } from '../lib/errors'
@@ -97,7 +98,8 @@ export default function Settings() {
   async function changePassword(e) {
     e.preventDefault()
     setPwOk(false)
-    if (pw1.length < 8) return setPwError('Use at least 8 characters.')
+    const pwErr = passwordError(pw1)
+    if (pwErr) return setPwError(pwErr)
     if (pw1 !== pw2) return setPwError('The two passwords do not match.')
     setPwBusy(true)
     setPwError('')

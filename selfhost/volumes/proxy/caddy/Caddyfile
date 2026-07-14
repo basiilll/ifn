@@ -30,8 +30,36 @@
         X-Frame-Options "DENY"
         Referrer-Policy "strict-origin-when-cross-origin"
         Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+        # The built SPA has no inline <script>, so script-src needs no 'unsafe-inline'.
+        # challenges.cloudflare.com covers the Turnstile api.js and the iframe it renders.
+        # static.cloudflareinsights.com is the Web Analytics beacon that Cloudflare INJECTS into
+        # the HTML at the edge (it is not in web/index.html — curl without a browser User-Agent
+        # and you will not see it). Its RUM POST goes to cloudflareinsights.com, hence connect-src.
+        # Drop both origins if Web Analytics is ever turned off in the Cloudflare dashboard.
+        # style-src keeps 'unsafe-inline' because Turnstile injects a style tag.
+        # connect-src is otherwise 'self': the Supabase API is same-origin via Kong, and no
+        # realtime .channel() is used, so no wss: origin is needed — add one here if that
+        # ever changes or the socket will be blocked.
+        Content-Security-Policy "default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+
+        # Strip infrastructure fingerprints. Caddy emits `Via: 1.1 Caddy` and Kong appends
+        # `Via: 1.1 kong/<version>` — the version is the actual disclosure (audit Case VII).
+        # KONG_HEADERS=off already stops Kong sending Server/Via/latency tokens; these
+        # deletions are the backstop that also removes Caddy's own Via (which Kong config
+        # cannot reach) and keeps the headers gone if that env var is ever reverted.
         -Server
+        -Via
+        -X-Kong-Proxy-Latency
+        -X-Kong-Upstream-Latency
     }
+
+    # Access log → stderr → docker logs (audit Case VIII: log URL, User-Agent, Referrer,
+    # timestamp). Caddy logs no requests per-site unless this is switched on.
+    # ponytail: client IP here is Cloudflare's edge, not the visitor. Real client IP needs
+    # `servers { client_ip_headers CF-Connecting-IP; trusted_proxies static <CF ranges> }`
+    # as a global option — add that if origin-side IP attribution is ever required.
+    log
 
     # Caching (NIC checklist "Other" item 6: pages must not be served from history/cache).
     # The HTML shell and every API response are no-store so a new deploy and per-user auth
