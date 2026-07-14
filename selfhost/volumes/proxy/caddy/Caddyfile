@@ -1,3 +1,48 @@
+# Global options. Trust Cloudflare as a reverse proxy so the REAL visitor IP survives to the
+# backends (audit Case VIII: "IP address of the originating Source").
+#
+# Without this, Caddy distrusts the inbound X-Forwarded-For and rewrites it with the peer it can
+# see — a Cloudflare edge address — so GoTrue's auth.audit_log_entries and every access log record
+# Cloudflare instead of the member. GoTrue takes the FIRST X-Forwarded-For entry
+# (auth internal/utilities/request.go getIPAddressWithXFF), so once Cloudflare is trusted the
+# chain reads "<visitor>, <cf-edge>" and the visitor is logged.
+#
+# These ranges are load-bearing for log integrity, not decoration. Only a peer inside them may
+# assert a client IP; trusting anything wider would let a caller forge X-Forwarded-For and write
+# a false IP into the audit trail. That is worse than logging Cloudflare's.
+#
+# Source: https://www.cloudflare.com/ips-v4 + /ips-v6 (fetched 2026-07-14). Cloudflare changes
+# these rarely, a few times a year. If a range is added upstream and not mirrored here, requests
+# via that range fall back to logging the edge IP — degraded, not broken.
+{
+    servers {
+        client_ip_headers CF-Connecting-IP X-Forwarded-For
+        trusted_proxies static \
+            173.245.48.0/20 \
+            103.21.244.0/22 \
+            103.22.200.0/22 \
+            103.31.4.0/22 \
+            141.101.64.0/18 \
+            108.162.192.0/18 \
+            190.93.240.0/20 \
+            188.114.96.0/20 \
+            197.234.240.0/22 \
+            198.41.128.0/17 \
+            162.158.0.0/15 \
+            104.16.0.0/13 \
+            104.24.0.0/14 \
+            172.64.0.0/13 \
+            131.0.72.0/22 \
+            2400:cb00::/32 \
+            2606:4700::/32 \
+            2803:f800::/32 \
+            2405:b500::/32 \
+            2405:8100::/32 \
+            2a06:98c0::/29 \
+            2c0f:f248::/32
+    }
+}
+
 {$PROXY_DOMAIN} {
     encode gzip zstd
 
