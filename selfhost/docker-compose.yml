@@ -101,6 +101,12 @@ services:
       # `off` drops Server/Via and the X-Kong-*-Latency tokens at the source; Caddy strips them
       # again on the way out, since Caddy adds a Via of its own that Kong config cannot reach.
       KONG_HEADERS: "off"
+      # CORS allow-origin for every browser-facing API route (referenced as the YAML
+      # anchor cors_config in kong.yml). Default "*" = allow all (correct + safe for a
+      # token-auth API: the JWT lives in localStorage, unreadable cross-origin). Set to
+      # your app origin in production to lock it, e.g. https://icfaifoundersnetwork.app.
+      # Keep "*" for local/LAN dev or localhost:5173 / the LAN IP get blocked.
+      KONG_CORS_ORIGIN: ${KONG_CORS_ORIGIN:-*}
       #KONG_SSL_CERT: /home/kong/server.crt
       #KONG_SSL_CERT_KEY: /home/kong/server.key
       SUPABASE_ANON_KEY: ${ANON_KEY}
@@ -495,6 +501,9 @@ services:
       SUPABASE_PUBLISHABLE_KEYS: "{\"default\":\"${SUPABASE_PUBLISHABLE_KEY:-}\"}"
       SUPABASE_SECRET_KEYS: "{\"default\":\"${SUPABASE_SECRET_KEY:-}\"}"
       SUPABASE_DB_URL: postgresql://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      # CORS allow-origin for send-contact / create-member. Default "*"; set to your app
+      # origin in production. Keep "*" for local dev (localhost:5173 calls these functions).
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-*}
       # TODO: Allow configuring VERIFY_JWT per function.
       VERIFY_JWT: "${FUNCTIONS_VERIFY_JWT}"
       # send-contact relay reuses the GoTrue SMTP mailer

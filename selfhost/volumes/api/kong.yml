@@ -47,6 +47,8 @@ services:
           - /auth/v1/verify
     plugins:
       - name: cors
+        config: &cors_config
+          origins: [ "$KONG_CORS_ORIGIN" ]
   - name: auth-v1-open-callback
     _comment: 'Auth: /auth/v1/callback* -> http://auth:9999/callback*'
     url: http://auth:9999/callback
@@ -57,6 +59,7 @@ services:
           - /auth/v1/callback
     plugins:
       - name: cors
+        config: *cors_config
   - name: auth-v1-open-authorize
     _comment: 'Auth: /auth/v1/authorize* -> http://auth:9999/authorize*'
     url: http://auth:9999/authorize
@@ -67,6 +70,7 @@ services:
           - /auth/v1/authorize
     plugins:
       - name: cors
+        config: *cors_config
   - name: auth-v1-open-jwks
     _comment: 'Auth: /auth/v1/.well-known/jwks.json -> http://auth:9999/.well-known/jwks.json'
     url: http://auth:9999/.well-known/jwks.json
@@ -77,6 +81,7 @@ services:
           - /auth/v1/.well-known/jwks.json
     plugins:
       - name: cors
+        config: *cors_config
 
   - name: auth-v1-open-sso-acs
     url: "http://auth:9999/sso/saml/acs"
@@ -87,6 +92,7 @@ services:
         - /sso/saml/acs
     plugins:
       - name: cors
+        config: *cors_config
 
   - name: auth-v1-open-sso-metadata
     url: "http://auth:9999/sso/saml/metadata"
@@ -97,6 +103,7 @@ services:
         - /sso/saml/metadata
     plugins:
       - name: cors
+        config: *cors_config
 
   ## Secure Auth routes
   - name: auth-v1
@@ -109,6 +116,7 @@ services:
           - /auth/v1/
     plugins:
       - name: cors
+        config: *cors_config
       - name: key-auth
         config:
           hide_credentials: false
@@ -138,6 +146,7 @@ services:
           - /rest/v1/
     plugins:
       - name: cors
+        config: *cors_config
       - name: key-auth
         config:
           hide_credentials: false
@@ -167,6 +176,7 @@ services:
           - /graphql/v1
     plugins:
       - name: cors
+        config: *cors_config
       - name: key-auth
         config:
           hide_credentials: false
@@ -198,6 +208,7 @@ services:
           - /realtime/v1/
     plugins:
       - name: cors
+        config: *cors_config
       - name: key-auth
         config:
           hide_credentials: false
@@ -259,6 +270,7 @@ services:
           - /realtime/v1/api
     plugins:
       - name: cors
+        config: *cors_config
       - name: key-auth
         config:
           hide_credentials: false
@@ -296,6 +308,7 @@ services:
           - /storage/v1/
     plugins:
       - name: cors
+        config: *cors_config
       - name: request-transformer
         config:
           add:
@@ -325,6 +338,7 @@ services:
           - /functions/v1/
     plugins:
       - name: cors
+        config: *cors_config
 
   ## OAuth 2.0 Authorization Server Metadata (RFC 8414)
   - name: well-known-oauth
@@ -337,6 +351,7 @@ services:
           - /.well-known/oauth-authorization-server
     plugins:
       - name: cors
+        config: *cors_config
 
   ## Analytics routes
   ## Not used - Studio and Vector talk directly to analytics via Docker networking.
@@ -435,6 +450,7 @@ services:
           - /
     plugins:
       - name: cors
+        config: *cors_config
       - name: basic-auth
         config:
           hide_credentials: true
