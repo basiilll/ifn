@@ -33,6 +33,24 @@ basicauth_credentials:
     password: '$DASHBOARD_PASSWORD'
 
 ###
+### Global plugins
+###
+plugins:
+  # Strip Access-Control-Allow-Credentials from every response. The stock GoTrue
+  # image (auth:9999) hardcodes `Access-Control-Allow-Credentials: true`, which
+  # pairs with our wildcard Access-Control-Allow-Origin and trips the audit rule
+  # "ACAC:true must not co-exist with ACAO:*". We are a bearer-token API (JWT in
+  # the Authorization header, no cookies), so credentialed CORS is never used and
+  # the header should never be true. Removing it closes the finding. No upstream
+  # relies on it. ponytail: global strip; make it route-scoped only if some future
+  # route legitimately needs cookie-credentialed CORS.
+  - name: response-transformer
+    config:
+      remove:
+        headers:
+          - Access-Control-Allow-Credentials
+
+###
 ### API Routes
 ###
 services:
