@@ -32,6 +32,7 @@ export default function Settings() {
   )
 
   // security
+  const [pw0, setPw0] = useState('')
   const [pw1, setPw1] = useState('')
   const [pw2, setPw2] = useState('')
   const [pwBusy, setPwBusy] = useState(false)
@@ -103,10 +104,16 @@ export default function Settings() {
     if (pw1 !== pw2) return setPwError('The two passwords do not match.')
     setPwBusy(true)
     setPwError('')
+    const { data: ok, error: vErr } = await supabase.rpc('verify_current_password', { attempt: pw0 })
+    if (vErr || !ok) {
+      setPwBusy(false)
+      if (vErr) console.error(vErr)
+      return setPwError(vErr ? errMessage(vErr, 'Could not verify your current password. Try again.') : 'Your current password is incorrect.')
+    }
     const { error } = await supabase.auth.updateUser({ password: pw1 })
     setPwBusy(false)
     if (error) { console.error(error); return setPwError(errMessage(error, 'Could not update your password. Try again.')) }
-    setPw1(''); setPw2(''); setPwOk(true)
+    setPw0(''); setPw1(''); setPw2(''); setPwOk(true)
   }
 
   async function signOutEverywhere() {
@@ -202,6 +209,10 @@ export default function Settings() {
               <Check size={15} /> Password updated.
             </div>
           )}
+          <label className="block">
+            <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-muted">Current password</span>
+            <input className="input" type="password" autoComplete="current-password" value={pw0} onChange={(e) => { setPw0(e.target.value); if (pwError) setPwError('') }} placeholder="Your current password" aria-invalid={!!pwError} aria-describedby={pwError ? 'pw-error' : undefined} />
+          </label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-muted">New password</span>
@@ -213,7 +224,7 @@ export default function Settings() {
             </label>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="btn-primary" disabled={pwBusy || !pw1 || !pw2}>
+            <button type="submit" className="btn-primary" disabled={pwBusy || !pw0 || !pw1 || !pw2}>
               {pwBusy ? 'Updating...' : 'Update password'}
             </button>
           </div>

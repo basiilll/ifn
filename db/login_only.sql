@@ -27,6 +27,24 @@ language sql security definer set search_path = public as $$
 $$;
 grant execute on function public.set_password_changed() to authenticated;
 
+-- 2b. Verify the caller's CURRENT password server-side (for the Settings "Old password"
+--     field). GoTrue's captcha guards signInWithPassword, so we can't cheaply re-auth from
+--     the client; instead compare the supplied password against the caller's own bcrypt hash
+--     with pgcrypto. Self-only (auth.uid()), so this is not a vector against other accounts.
+create extension if not exists pgcrypto with schema extensions;
+
+create or replace function public.verify_current_password(attempt text)
+returns boolean
+language sql stable security definer set search_path = public, extensions as $$
+  select exists (
+    select 1 from auth.users
+    where id = auth.uid()
+      and encrypted_password is not null
+      and encrypted_password = crypt(attempt, encrypted_password)
+  )
+$$;
+grant execute on function public.verify_current_password(text) to authenticated;
+
 -- 3. Normalize existing linkedin values to bare handles. The app now stores + renders only the
 --    handle (https://www.linkedin.com/in/<handle>); a stored full URL or, worse, a non-LinkedIn
 --    or javascript:/data: link was a phishing / stored-XSS vector on the directory.
